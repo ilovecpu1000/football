@@ -1,0 +1,1605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Football Info for Yeon-Sung</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="YS Football">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <meta name="theme-color" content="#ffffff">
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      overscroll-behavior: none;
+      touch-action: pan-y;
+      -webkit-touch-callout: none;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f0f2f5;
+      color: #1a1a1a;
+      min-height: 100vh;
+      min-height: 100dvh;
+      overflow-x: hidden;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    /* Header */
+    .header {
+      background: #fff;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 2px solid #e0e0e0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+    .header h1 { font-size: 17px; color: #e94560; font-weight: 700; }
+    .header h1 span { color: #2563eb; }
+    .header-right { display: flex; align-items: center; gap: 10px; font-size: 12px; color: #888; }
+    .refresh-timer {
+      background: #eef2ff; padding: 4px 10px; border-radius: 12px;
+      font-size: 11px; color: #2563eb; font-weight: 600;
+    }
+    .refresh-btn {
+      background: #2563eb; color: #fff; border: none;
+      width: 30px; height: 30px; border-radius: 50%; font-size: 16px;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: transform 0.3s;
+    }
+    .refresh-btn:hover { background: #1d4ed8; }
+    .refresh-btn.spinning { animation: spin 0.8s linear infinite; }
+
+    /* World Cup D-day Banner */
+    .wc-banner {
+      background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 50%, #e94560 100%);
+      color: #fff; text-align: center; padding: 8px 16px;
+      font-size: 13px; font-weight: 600;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+    }
+    .wc-banner .wc-icon { font-size: 18px; }
+    .wc-banner .wc-dday {
+      background: rgba(255,255,255,0.2); padding: 3px 10px; border-radius: 12px;
+      font-size: 14px; font-weight: 700; letter-spacing: 0.5px;
+    }
+    .wc-banner .wc-dday.past { background: rgba(233,69,96,0.4); }
+
+    /* League Tabs */
+    .league-tabs {
+      display: flex; overflow-x: auto; background: #fff;
+      padding: 6px 8px 0; gap: 3px;
+      -webkit-overflow-scrolling: touch; scrollbar-width: none;
+    }
+    .league-tabs::-webkit-scrollbar { display: none; }
+    .league-tab {
+      padding: 7px 12px; border-radius: 8px 8px 0 0;
+      background: #f0f2f5; color: #666; font-size: 12px; font-weight: 600;
+      cursor: pointer; white-space: nowrap;
+      border: 1px solid #e0e0e0; border-bottom: none;
+      transition: all 0.2s; display: flex; align-items: center; gap: 5px;
+    }
+    .league-tab img { width: 16px; height: 16px; object-fit: contain; }
+    .league-tab.active { background: #f0f2f5; color: #2563eb; border-color: #2563eb; }
+    .league-tab:hover:not(.active) { color: #333; background: #e8eaed; }
+
+    /* Date Navigator */
+    .date-nav {
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      padding: 10px; background: #fff; border-bottom: 1px solid #e0e0e0;
+    }
+    .date-btn {
+      background: #eef2ff; color: #2563eb; border: none;
+      width: 34px; height: 34px; border-radius: 50%; font-size: 16px;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+    }
+    .date-btn:hover { background: #dbeafe; }
+    .date-display {
+      font-size: 14px; font-weight: 600; color: #1a1a1a;
+      min-width: 170px; text-align: center; cursor: pointer;
+      padding: 5px 10px; border-radius: 8px;
+    }
+    .date-display:hover { background: #eef2ff; }
+    .today-btn {
+      background: #e94560; color: white; border: none;
+      padding: 5px 12px; border-radius: 14px; font-size: 11px; font-weight: 600; cursor: pointer;
+    }
+
+    /* Calendar Overlay */
+    .calendar-overlay {
+      display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.35); z-index: 200;
+      justify-content: center; align-items: flex-start;
+      padding-top: 40px;
+      overflow-y: auto;
+    }
+    .calendar-overlay.show { display: flex; }
+    .calendar {
+      background: #fff; border-radius: 16px; padding: 20px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+      width: 700px; max-width: 95vw;
+      margin-bottom: 40px;
+    }
+    .cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .cal-header .cal-title { font-size: 18px; font-weight: 700; color: #1a1a1a; }
+    .cal-nav {
+      background: #eef2ff; color: #2563eb; border: none;
+      width: 34px; height: 34px; border-radius: 50%; font-size: 16px;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+    }
+    .cal-loading { text-align: center; padding: 8px; font-size: 12px; color: #888; }
+    .cal-weekdays {
+      display: grid; grid-template-columns: repeat(7, 1fr);
+      text-align: center; font-size: 12px; color: #999; font-weight: 600; margin-bottom: 4px;
+    }
+    .cal-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+    .cal-cell {
+      min-height: 80px; border: 1px solid #f0f0f0; border-radius: 8px;
+      padding: 4px; cursor: pointer; transition: all 0.15s;
+      background: #fff; overflow: hidden;
+    }
+    .cal-cell:hover { border-color: #2563eb; background: #f8f9ff; }
+    .cal-cell.today { border: 2px solid #2563eb; }
+    .cal-cell.selected { background: #eef2ff; border-color: #2563eb; }
+    .cal-cell.other-month { background: #fafafa; opacity: 0.5; }
+    .cal-cell .cal-date {
+      font-size: 13px; font-weight: 600; color: #333;
+      padding: 2px 4px; display: inline-block;
+    }
+    .cal-cell.today .cal-date {
+      background: #2563eb; color: #fff; border-radius: 50%; width: 24px; height: 24px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .cal-cell.selected .cal-date { color: #2563eb; }
+    .cal-matches { margin-top: 2px; }
+    .cal-match {
+      font-size: 9px; color: #555; padding: 1px 3px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      line-height: 1.4; border-radius: 3px; cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .cal-match:hover { opacity: 0.7; }
+    .cal-match.cal-live { background: #fee2e2; color: #dc2626; font-weight: 600; }
+    .cal-match.cal-final { background: #f0f0f0; color: #555; }
+    .cal-match.cal-scheduled { background: #eef2ff; color: #2563eb; }
+    .cal-more { font-size: 9px; color: #2563eb; font-weight: 600; padding: 1px 3px; }
+
+    @media (max-width: 600px) {
+      .calendar { width: 98vw; padding: 12px; }
+      .cal-cell { min-height: 60px; }
+      .cal-match { font-size: 8px; }
+    }
+
+    /* Main Layout: Side by Side */
+    .main-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      padding: 12px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .panel {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+      overflow: hidden;
+    }
+    .panel-header {
+      padding: 10px 14px;
+      font-size: 14px;
+      font-weight: 700;
+      color: #2563eb;
+      background: #f8f9fa;
+      border-bottom: 1px solid #e0e0e0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .panel-body {
+      padding: 8px;
+      max-height: calc(100vh - 200px);
+      overflow-y: auto;
+    }
+
+    @media (max-width: 768px) {
+      .main-layout {
+        grid-template-columns: 1fr;
+      }
+      .panel-body {
+        max-height: none;
+      }
+    }
+
+    /* Match Card */
+    .match-group-title {
+      font-size: 13px; font-weight: 700; color: #2563eb;
+      padding: 10px 6px 6px; border-bottom: 1px solid #e8e8e8;
+      margin-bottom: 6px; display: flex; align-items: center; gap: 6px;
+    }
+    .match-group-title img { width: 18px; height: 18px; }
+
+    .match-card {
+      background: #fff; border-radius: 8px; padding: 10px 12px;
+      margin-bottom: 5px; border: 1px solid #eee;
+      transition: border-color 0.2s;
+    }
+    .match-card:hover { border-color: #ccc; }
+    .match-card.live { border-left: 3px solid #e94560; }
+    .match-main {
+      display: flex; align-items: center;
+    }
+    .match-time {
+      width: 50px; text-align: center; font-size: 13px; color: #888; flex-shrink: 0;
+      font-weight: 600;
+    }
+    .match-time.live-time { color: #e94560; font-weight: 700; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+    .match-teams { flex: 1; min-width: 0; }
+    .match-team {
+      display: flex; align-items: center; gap: 6px; padding: 2px 0; font-size: 13px;
+    }
+    .match-team img { width: 18px; height: 18px; flex-shrink: 0; }
+    .match-team .name {
+      flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #333;
+    }
+    .match-team .score {
+      font-weight: 700; font-size: 15px; width: 22px; text-align: center; color: #1a1a1a;
+    }
+    .match-team.winner .name { color: #1a1a1a; font-weight: 600; }
+    .match-team.loser .name { color: #aaa; }
+
+    .match-status {
+      width: 70px; text-align: center; font-size: 11px; color: #888; flex-shrink: 0;
+      line-height: 1.3;
+    }
+    .match-status.ft { color: #2563eb; font-weight: 600; }
+    .match-status.live { color: #e94560; font-weight: 700; }
+    .match-status.scheduled-time { color: #333; }
+    .match-status .time-uk { display: block; font-size: 12px; font-weight: 700; color: #2563eb; }
+    .match-status .time-venue { display: block; font-size: 11px; color: #16a34a; font-weight: 600; }
+
+    /* Match Card clickable */
+    .match-card.clickable { cursor: pointer; }
+    .match-card.clickable:hover { border-color: #2563eb; background: #fafbff; }
+    .match-card .match-expand-hint {
+      font-size: 10px; color: #bbb; text-align: center; margin-top: 2px;
+      transition: opacity 0.2s;
+    }
+    .match-card.expanded .match-expand-hint { display: none; }
+
+    /* Match Details (goals, cards) */
+    .match-details {
+      margin-top: 6px; padding-top: 6px; border-top: 1px dashed #eee;
+      font-size: 11px; color: #666;
+      display: none; /* hidden by default */
+    }
+    .match-card.expanded .match-details { display: block; }
+    .match-detail-row {
+      display: flex; align-items: center; gap: 4px; padding: 1px 0 1px 50px;
+    }
+    .detail-icon { font-size: 12px; width: 16px; text-align: center; flex-shrink: 0; }
+    .detail-minute { color: #999; font-size: 10px; min-width: 28px; }
+    .detail-player { color: #444; }
+    .detail-yellow { color: #f59e0b; }
+    .detail-red { color: #dc2626; }
+    .detail-goal { color: #2563eb; font-weight: 600; }
+
+    /* Match Detail Modal */
+    .detail-overlay {
+      display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5); z-index: 300;
+      justify-content: center; align-items: flex-start;
+      padding-top: 30px; overflow-y: auto;
+    }
+    .detail-overlay.show { display: flex; }
+    .detail-modal {
+      background: #fff; border-radius: 16px;
+      width: 560px; max-width: 95vw; margin-bottom: 40px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.25); overflow: hidden;
+    }
+    .detail-modal-close {
+      position: absolute; top: 10px; right: 14px;
+      background: rgba(255,255,255,0.3); border: none; color: #fff;
+      width: 32px; height: 32px; border-radius: 50%; font-size: 18px;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+    }
+    .detail-score-header {
+      background: linear-gradient(135deg, #1e3a5f, #2563eb);
+      color: #fff; padding: 20px 16px; text-align: center; position: relative;
+    }
+    .detail-league-name { font-size: 11px; opacity: 0.8; margin-bottom: 8px; }
+    .detail-teams-row {
+      display: flex; align-items: center; justify-content: center; gap: 16px;
+    }
+    .detail-team-col { text-align: center; flex: 1; max-width: 140px; }
+    .detail-team-col img { width: 48px; height: 48px; margin-bottom: 4px; }
+    .detail-team-col .t-name { font-size: 13px; font-weight: 600; }
+    .detail-score-box {
+      font-size: 36px; font-weight: 800; letter-spacing: 4px;
+      min-width: 80px; text-align: center;
+    }
+    .detail-score-box .score-sep { opacity: 0.5; margin: 0 2px; }
+    .detail-match-info { font-size: 11px; opacity: 0.8; margin-top: 8px; }
+
+    .detail-tabs {
+      display: flex; border-bottom: 2px solid #e0e0e0; background: #f8f9fa;
+    }
+    .detail-tab {
+      flex: 1; text-align: center; padding: 10px 8px; font-size: 12px;
+      font-weight: 600; color: #888; cursor: pointer; border-bottom: 2px solid transparent;
+      margin-bottom: -2px; transition: all 0.2s;
+    }
+    .detail-tab.active { color: #2563eb; border-bottom-color: #2563eb; }
+    .detail-tab:hover:not(.active) { color: #333; }
+
+    .detail-tab-content { display: none; padding: 12px 16px; max-height: 50vh; overflow-y: auto; }
+    .detail-tab-content.active { display: block; }
+
+    /* Stats bars */
+    .stat-row {
+      display: flex; align-items: center; gap: 8px; padding: 6px 0;
+      border-bottom: 1px solid #f5f5f5;
+    }
+    .stat-val { width: 36px; text-align: center; font-size: 13px; font-weight: 700; color: #333; }
+    .stat-label { flex: 1; text-align: center; font-size: 11px; color: #888; font-weight: 600; }
+    .stat-bar-wrap { flex: 2; height: 6px; background: #f0f0f0; border-radius: 3px; overflow: hidden; }
+    .stat-bar-wrap.left { direction: rtl; }
+    .stat-bar {
+      height: 100%; border-radius: 3px; transition: width 0.5s;
+    }
+    .stat-bar.home { background: #2563eb; }
+    .stat-bar.away { background: #e94560; }
+
+    /* Events timeline */
+    .event-row {
+      display: flex; align-items: center; gap: 8px; padding: 5px 0;
+      font-size: 12px; border-bottom: 1px solid #f8f8f8;
+    }
+    .event-min { width: 32px; color: #999; font-size: 11px; font-weight: 600; text-align: right; flex-shrink: 0; }
+    .event-icon { font-size: 14px; width: 20px; text-align: center; flex-shrink: 0; }
+    .event-text { flex: 1; color: #333; }
+    .event-team-tag {
+      font-size: 9px; padding: 1px 5px; border-radius: 8px;
+      font-weight: 600; flex-shrink: 0;
+    }
+    .event-team-tag.home { background: #eef2ff; color: #2563eb; }
+    .event-team-tag.away { background: #fef2f2; color: #e94560; }
+
+    /* Lineups */
+    .lineup-section { margin-bottom: 12px; }
+    .lineup-title {
+      font-size: 13px; font-weight: 700; padding: 6px 0; color: #2563eb;
+      border-bottom: 1px solid #e0e0e0; margin-bottom: 6px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .lineup-title img { width: 18px; height: 18px; }
+    .lineup-formation { font-size: 11px; color: #888; font-weight: 400; }
+    .lineup-player {
+      display: flex; align-items: center; gap: 6px; padding: 3px 0;
+      font-size: 12px; color: #333;
+    }
+    .lineup-number {
+      width: 22px; height: 22px; border-radius: 50%; background: #eef2ff;
+      color: #2563eb; font-size: 10px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .lineup-sub-label {
+      font-size: 11px; color: #999; font-weight: 600; padding: 6px 0 3px;
+      border-top: 1px dashed #eee; margin-top: 6px;
+    }
+    .detail-loading { text-align: center; padding: 40px; color: #888; }
+    .detail-loading .spinner {
+      width: 30px; height: 30px; border: 3px solid #e0e0e0;
+      border-top-color: #2563eb; border-radius: 50%;
+      animation: spin 0.8s linear infinite; margin: 0 auto 10px;
+    }
+
+    @media (max-width: 600px) {
+      .detail-modal { width: 98vw; }
+      .detail-score-box { font-size: 28px; }
+      .detail-team-col img { width: 36px; height: 36px; }
+    }
+
+    /* Standings Table */
+    .standings-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .standings-table th {
+      background: #f8f9fa; color: #2563eb; padding: 8px 6px;
+      text-align: center; font-weight: 600; position: sticky; top: 0; z-index: 5;
+    }
+    .standings-table th:nth-child(2) { text-align: left; }
+    .standings-table td {
+      padding: 6px; text-align: center; border-bottom: 1px solid #f0f0f0; color: #333;
+    }
+    .standings-table td:nth-child(2) { text-align: left; }
+    .standings-table tr:hover td { background: #f8f9ff; }
+    .standings-table .team-cell { display: flex; align-items: center; gap: 6px; }
+    .standings-table .team-cell img { width: 16px; height: 16px; }
+    .standings-table .pos-1, .standings-table .pos-2,
+    .standings-table .pos-3, .standings-table .pos-4 { border-left: 3px solid #2563eb; }
+    .standings-table .pos-rel { border-left: 3px solid #e94560; }
+    .standings-table .pts { color: #2563eb; font-weight: 700; }
+
+    /* Loading & Empty */
+    .loading { text-align: center; padding: 40px 20px; color: #888; }
+    .loading .spinner {
+      width: 36px; height: 36px; border: 3px solid #e0e0e0;
+      border-top-color: #2563eb; border-radius: 50%;
+      animation: spin 0.8s linear infinite; margin: 0 auto 12px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .no-matches { text-align: center; padding: 40px 16px; color: #999; font-size: 14px; }
+    .no-matches .icon { font-size: 40px; margin-bottom: 10px; }
+
+    /* Screen Time Alert */
+    .screen-alert-overlay {
+      display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.85); z-index: 500;
+      justify-content: center; align-items: center;
+    }
+    .screen-alert-overlay.show { display: flex; }
+    .screen-alert-box {
+      background: #fff; border-radius: 20px; padding: 30px 24px; text-align: center;
+      width: 340px; max-width: 90vw;
+      box-shadow: 0 16px 50px rgba(0,0,0,0.3);
+      animation: alertBounce 0.4s ease-out;
+    }
+    @keyframes alertBounce {
+      0% { transform: scale(0.7); opacity: 0; }
+      60% { transform: scale(1.05); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .screen-alert-icon { font-size: 50px; margin-bottom: 12px; }
+    .screen-alert-msg {
+      font-size: 18px; font-weight: 700; color: #1a1a1a;
+      line-height: 1.6; margin-bottom: 8px;
+    }
+    .screen-alert-sub { font-size: 13px; color: #888; margin-bottom: 20px; }
+    .screen-alert-btn {
+      background: #2563eb; color: #fff; border: none;
+      padding: 12px 40px; border-radius: 30px; font-size: 16px;
+      font-weight: 700; cursor: pointer; transition: background 0.2s;
+    }
+    .screen-alert-btn:hover { background: #1d4ed8; }
+    /* Lock screen */
+    .screen-lock-overlay {
+      display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.95); z-index: 600;
+      justify-content: center; align-items: center;
+      flex-direction: column;
+    }
+    .screen-lock-overlay.show { display: flex; }
+    .screen-lock-box {
+      background: #1a1a2e; border-radius: 20px; padding: 36px 28px; text-align: center;
+      width: 340px; max-width: 90vw;
+      box-shadow: 0 16px 50px rgba(0,0,0,0.5);
+    }
+    .screen-lock-icon { font-size: 60px; margin-bottom: 16px; }
+    .screen-lock-msg {
+      font-size: 20px; font-weight: 700; color: #ff6b6b;
+      line-height: 1.6; margin-bottom: 8px;
+    }
+    .screen-lock-sub { font-size: 13px; color: #aaa; margin-bottom: 24px; }
+    .screen-lock-input {
+      width: 180px; padding: 12px 16px; border: 2px solid #444;
+      border-radius: 12px; font-size: 20px; text-align: center;
+      background: #2a2a3e; color: #fff; letter-spacing: 8px;
+      outline: none; -webkit-text-security: disc;
+    }
+    .screen-lock-input:focus { border-color: #2563eb; }
+    .screen-lock-submit {
+      display: block; margin: 16px auto 0; background: #2563eb; color: #fff;
+      border: none; padding: 12px 40px; border-radius: 30px;
+      font-size: 16px; font-weight: 700; cursor: pointer;
+    }
+    .screen-lock-error {
+      color: #ff4444; font-size: 13px; margin-top: 10px;
+      min-height: 18px;
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-12px); }
+      40% { transform: translateX(12px); }
+      60% { transform: translateX(-8px); }
+      80% { transform: translateX(8px); }
+    }
+
+    /* Footer */
+    .footer { text-align: center; padding: 16px; color: #bbb; font-size: 11px; }
+
+    @media (max-width: 600px) {
+      .header h1 { font-size: 14px; }
+      .match-card { padding: 8px 10px; }
+      .match-time { width: 48px; }
+      .match-status { width: 48px; }
+      .match-detail-row { padding-left: 48px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- World Cup D-day Banner -->
+  <div class="wc-banner" id="wcBanner"></div>
+
+  <div class="header">
+    <h1>⚽ Football Info for <span>Yeon-Sung</span></h1>
+    <div class="header-right">
+      <span id="dataSource">ESPN</span>
+      <span class="refresh-timer" id="refreshTimer">60s</span>
+      <button class="refresh-btn" id="refreshBtn" onclick="manualRefresh()" title="Refresh">🔄</button>
+    </div>
+  </div>
+
+  <div class="league-tabs" id="leagueTabs"></div>
+
+  <div class="date-nav">
+    <button class="date-btn" onclick="changeDate(-1)">◀</button>
+    <span class="date-display" id="dateDisplay" onclick="openCalendar()"></span>
+    <button class="date-btn" onclick="changeDate(1)">▶</button>
+    <button class="today-btn" onclick="goToday()">Today</button>
+  </div>
+
+  <!-- Calendar -->
+  <div class="calendar-overlay" id="calendarOverlay" onclick="closeCalendar(event)">
+    <div class="calendar" onclick="event.stopPropagation()">
+      <div class="cal-header">
+        <button class="cal-nav" onclick="calChangeMonth(-1)">◀</button>
+        <span class="cal-title" id="calTitle"></span>
+        <button class="cal-nav" onclick="calChangeMonth(1)">▶</button>
+      </div>
+      <div class="cal-weekdays">
+        <div>Su</div><div>Mo</div><div>Tu</div><div>We</div>
+        <div>Th</div><div>Fr</div><div>Sa</div>
+      </div>
+      <div class="cal-loading" id="calLoading" style="display:none;">Loading matches...</div>
+      <div class="cal-days" id="calDays"></div>
+    </div>
+  </div>
+
+  <!-- Match Detail Modal -->
+  <div class="detail-overlay" id="detailOverlay" onclick="closeDetail(event)">
+    <div class="detail-modal" id="detailModal" onclick="event.stopPropagation()">
+      <div id="detailContent">
+        <div class="detail-loading"><div class="spinner"></div>Loading match details...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Layout: Matches + Table side by side -->
+  <div class="main-layout">
+    <div class="panel">
+      <div class="panel-header">⚽ Matches</div>
+      <div class="panel-body" id="matchesPanel">
+        <div class="loading"><div class="spinner"></div>Loading...</div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-header">📊 Standings</div>
+      <div class="panel-body" id="standingsPanel">
+        <div class="loading"><div class="spinner"></div>Loading...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Screen Time Alert -->
+  <div class="screen-alert-overlay" id="screenAlertOverlay">
+    <div class="screen-alert-box">
+      <div class="screen-alert-icon">⏰</div>
+      <div class="screen-alert-msg" id="screenAlertMsg">연성아 너무 오래 보고 있다..<br>여기까지만 봐</div>
+      <div class="screen-alert-sub" id="screenAlertSub"></div>
+      <div class="screen-alert-warn" id="screenAlertWarn" style="font-size:12px;color:#e74c3c;margin-bottom:12px;"></div>
+      <button class="screen-alert-btn" onclick="dismissScreenAlert()">OK</button>
+    </div>
+  </div>
+
+  <!-- Screen Lock (after 3 warnings) -->
+  <div class="screen-lock-overlay" id="screenLockOverlay">
+    <div class="screen-lock-box">
+      <div class="screen-lock-icon">🔒</div>
+      <div class="screen-lock-msg">사용 시간 초과!<br>잠금되었습니다</div>
+      <div class="screen-lock-sub" id="screenLockSub"></div>
+      <input type="password" class="screen-lock-input" id="screenLockInput"
+             placeholder="••••" maxlength="10" inputmode="numeric"
+             onkeydown="if(event.key==='Enter')unlockScreen()">
+      <button class="screen-lock-submit" onclick="unlockScreen()">잠금 해제</button>
+      <div class="screen-lock-error" id="screenLockError"></div>
+    </div>
+  </div>
+
+  <div class="footer">Data from ESPN &bull; Auto-refresh every 60s</div>
+
+<script>
+const LEAGUES = [
+  { id: 'all',              name: 'All',   espn: null, logo: '' },
+  { id: 'eng.1',            name: 'EPL',   espn: 'eng.1',          logo: 'https://a.espncdn.com/i/leaguelogos/soccer/500/23.png' },
+  { id: 'esp.1',            name: 'LIGA',  espn: 'esp.1',          logo: 'https://a.espncdn.com/i/leaguelogos/soccer/500/15.png' },
+  { id: 'ger.1',            name: 'BL',    espn: 'ger.1',          logo: 'https://a.espncdn.com/i/leaguelogos/soccer/500/10.png' },
+  { id: 'ita.1',            name: 'SA',    espn: 'ita.1',          logo: 'https://a.espncdn.com/i/leaguelogos/soccer/500/12.png' },
+  { id: 'fra.1',            name: 'L1',    espn: 'fra.1',          logo: 'https://a.espncdn.com/i/leaguelogos/soccer/500/9.png' },
+  { id: 'uefa.champions',   name: 'UCL',   espn: 'uefa.champions', logo: 'https://a.espncdn.com/i/leaguelogos/soccer/500/2.png' },
+  { id: 'uefa.europa',      name: 'UEL',   espn: 'uefa.europa',    logo: 'https://a.espncdn.com/i/leaguelogos/soccer/500/2310.png' },
+  { id: 'eng.fa',            name: 'FA',    espn: 'eng.fa',         logo: 'https://a.espncdn.com/i/leaguelogos/soccer/500/169.png' },
+  { id: 'fifa.world',       name: 'WC',    espn: 'fifa.world',     logo: 'https://a.espncdn.com/i/leaguelogos/soccer/500/4.png' },
+];
+const ALL_SINGLE = LEAGUES.filter(l => l.espn !== null);
+
+let currentLeague = 'all';
+let currentDate = new Date();
+let refreshInterval = null;
+let refreshCount = 60;
+let calViewDate = new Date();
+
+// ===== WORLD CUP D-DAY =====
+// FIFA World Cup 2026 kicks off June 11, 2026
+const WC_DATE = new Date(2026, 5, 11); // June 11, 2026
+function updateWCBanner() {
+  const now = new Date();
+  now.setHours(0,0,0,0);
+  const wcDay = new Date(WC_DATE);
+  wcDay.setHours(0,0,0,0);
+  const diff = Math.ceil((wcDay - now) / (1000*60*60*24));
+  const banner = document.getElementById('wcBanner');
+
+  if (diff > 0) {
+    banner.innerHTML = `<span class="wc-icon">🏆</span>
+      FIFA World Cup 2026
+      <span class="wc-dday">D-${diff}</span>
+      <span style="font-size:11px; opacity:0.85;">Jun 11 ~ Jul 19</span>`;
+  } else if (diff === 0) {
+    banner.innerHTML = `<span class="wc-icon">🏆</span>
+      FIFA World Cup 2026
+      <span class="wc-dday" style="background:rgba(233,69,96,0.6);">D-DAY! 🎉</span>
+      <span style="font-size:11px;">IT'S HERE!</span>`;
+  } else {
+    // During or after the tournament (Jul 19, 2026 is final)
+    const wcEnd = new Date(2026, 6, 19);
+    if (now <= wcEnd) {
+      const matchDay = Math.abs(diff) + 1;
+      banner.innerHTML = `<span class="wc-icon">🏆</span>
+        FIFA World Cup 2026 <span style="font-size:11px; opacity:0.85;">LIVE! Day ${matchDay}</span>`;
+    } else {
+      banner.style.display = 'none';
+    }
+  }
+}
+
+// ===== MANUAL REFRESH =====
+function manualRefresh() {
+  const btn = document.getElementById('refreshBtn');
+  btn.classList.add('spinning');
+  refreshCount = 60;
+  calMatchCache = {}; // clear calendar cache too
+  loadAll().then(() => {
+    setTimeout(() => btn.classList.remove('spinning'), 500);
+  });
+}
+
+function init() {
+  updateWCBanner();
+  renderTabs();
+  updateDateDisplay();
+  loadAll();
+  startRefreshTimer();
+}
+
+// ===== TABS =====
+// 컵 대회는 경기가 있을 때만 탭 표시
+const CUP_ONLY_LEAGUES = ['eng.fa', 'fifa.world'];
+let cupLeaguesWithMatches = new Set();
+
+function renderTabs() {
+  document.getElementById('leagueTabs').innerHTML = LEAGUES.filter(l => {
+    if (CUP_ONLY_LEAGUES.includes(l.id)) {
+      return cupLeaguesWithMatches.has(l.id);
+    }
+    return true;
+  }).map(l =>
+    `<div class="league-tab ${l.id === currentLeague ? 'active' : ''}"
+          onclick="selectLeague('${l.id}')">
+      ${l.logo ? `<img src="${l.logo}" alt="" onerror="this.style.display='none'">` : ''}
+      ${l.name}
+    </div>`
+  ).join('');
+}
+function selectLeague(id) {
+  currentLeague = id;
+  renderTabs();
+  loadAll();
+}
+
+// ===== DATE =====
+function formatDate(d) {
+  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${days[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+}
+function getDateStr(d) {
+  return `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
+}
+function updateDateDisplay() {
+  const isToday = currentDate.toDateString() === new Date().toDateString();
+  document.getElementById('dateDisplay').textContent =
+    (isToday ? '📅 Today - ' : '📅 ') + formatDate(currentDate);
+}
+function changeDate(delta) {
+  currentDate.setDate(currentDate.getDate() + delta);
+  updateDateDisplay();
+  loadAll();
+}
+function goToday() {
+  currentDate = new Date();
+  updateDateDisplay();
+  loadAll();
+}
+
+// ===== CALENDAR =====
+let calMatchCache = {};  // key: 'YYYY-MM' -> { 'YYYYMMDD': [{home,away,hScore,aScore,state,league},...] }
+
+function openCalendar() {
+  calViewDate = new Date(currentDate);
+  renderCalendar();
+  document.getElementById('calendarOverlay').classList.add('show');
+  fetchCalendarMatches();
+}
+function closeCalendar(e) {
+  if (e && e.target !== document.getElementById('calendarOverlay')) return;
+  document.getElementById('calendarOverlay').classList.remove('show');
+}
+function calChangeMonth(delta) {
+  calViewDate.setMonth(calViewDate.getMonth() + delta);
+  renderCalendar();
+  fetchCalendarMatches();
+}
+
+async function fetchCalendarMatches() {
+  const y = calViewDate.getFullYear(), m = calViewDate.getMonth();
+  const cacheKey = `${y}-${String(m+1).padStart(2,'0')}`;
+  if (calMatchCache[cacheKey]) { renderCalendarMatches(calMatchCache[cacheKey]); return; }
+
+  // Show loading indicator
+  const loadingEl = document.getElementById('calLoading');
+  if (loadingEl) loadingEl.style.display = 'block';
+
+  const matchesByDate = {};
+  const dim = new Date(y, m+1, 0).getDate();
+
+  // Fetch data for each league for the whole month (batch by date range)
+  // ESPN API takes single date, so we fetch for each day in parallel with throttling
+  // Optimization: fetch every 3 days and use those results
+  const datesToFetch = [];
+  for (let d = 1; d <= dim; d++) {
+    datesToFetch.push(getDateStr(new Date(y, m, d)));
+  }
+
+  // Fetch all leagues for all days (limit concurrency)
+  const leaguesToFetch = ALL_SINGLE;
+  const batchSize = 5;
+  for (let i = 0; i < datesToFetch.length; i += batchSize) {
+    const batch = datesToFetch.slice(i, i + batchSize);
+    const promises = [];
+    for (const dateStr of batch) {
+      for (const lg of leaguesToFetch) {
+        promises.push(
+          fetchESPN(lg.espn, dateStr).then(data => {
+            if (!data?.events?.length) return;
+            if (!matchesByDate[dateStr]) matchesByDate[dateStr] = [];
+            for (const ev of data.events) {
+              const comp = ev.competitions?.[0];
+              if (!comp) continue;
+              const home = comp.competitors?.find(c => c.homeAway === 'home');
+              const away = comp.competitors?.find(c => c.homeAway === 'away');
+              if (!home || !away) continue;
+              const state = comp.status?.type?.state || 'pre';
+              matchesByDate[dateStr].push({
+                home: home.team?.abbreviation || home.team?.shortDisplayName || '?',
+                away: away.team?.abbreviation || away.team?.shortDisplayName || '?',
+                hScore: home.score || '0',
+                aScore: away.score || '0',
+                state: state,
+                league: lg.name,
+                leagueId: lg.id,
+              });
+            }
+          })
+        );
+      }
+    }
+    await Promise.all(promises);
+    // Progressive render after each batch
+    renderCalendarMatches(matchesByDate);
+  }
+
+  calMatchCache[cacheKey] = matchesByDate;
+  if (loadingEl) loadingEl.style.display = 'none';
+  renderCalendarMatches(matchesByDate);
+}
+
+function renderCalendar() {
+  const months = ['January','February','March','April','May','June',
+                  'July','August','September','October','November','December'];
+  const y = calViewDate.getFullYear(), m = calViewDate.getMonth();
+  document.getElementById('calTitle').textContent = `${months[m]} ${y}`;
+  const firstDay = new Date(y, m, 1).getDay();
+  const dim = new Date(y, m+1, 0).getDate();
+  const prevDim = new Date(y, m, 0).getDate();
+  const today = new Date();
+  let html = '';
+
+  // Previous month fill
+  for (let i = firstDay-1; i >= 0; i--) {
+    const pd = prevDim - i;
+    const pm = m - 1;
+    const ds = getDateStr(new Date(y, pm, pd));
+    html += `<div class="cal-cell other-month" onclick="selectCalDate(${y},${pm},${pd})">
+      <span class="cal-date">${pd}</span>
+      <div class="cal-matches" data-date="${ds}"></div>
+    </div>`;
+  }
+
+  // Current month days
+  for (let d = 1; d <= dim; d++) {
+    const isT = d===today.getDate() && m===today.getMonth() && y===today.getFullYear();
+    const isS = d===currentDate.getDate() && m===currentDate.getMonth() && y===currentDate.getFullYear();
+    const ds = getDateStr(new Date(y, m, d));
+    html += `<div class="cal-cell${isT?' today':''}${isS?' selected':''}" onclick="selectCalDate(${y},${m},${d})">
+      <span class="cal-date">${d}</span>
+      <div class="cal-matches" data-date="${ds}"></div>
+    </div>`;
+  }
+
+  // Next month fill
+  const rem = (7 - ((firstDay + dim) % 7)) % 7;
+  for (let d = 1; d <= rem; d++) {
+    const nm = m + 1;
+    const ds = getDateStr(new Date(y, nm, d));
+    html += `<div class="cal-cell other-month" onclick="selectCalDate(${y},${nm},${d})">
+      <span class="cal-date">${d}</span>
+      <div class="cal-matches" data-date="${ds}"></div>
+    </div>`;
+  }
+  document.getElementById('calDays').innerHTML = html;
+}
+
+function renderCalendarMatches(matchesByDate) {
+  const cells = document.querySelectorAll('.cal-matches[data-date]');
+  cells.forEach(cell => {
+    const dateStr = cell.getAttribute('data-date');
+    const matches = matchesByDate[dateStr];
+    if (!matches || matches.length === 0) { cell.innerHTML = ''; return; }
+
+    const maxShow = 4;
+    let html = '';
+    const shown = matches.slice(0, maxShow);
+    for (const m of shown) {
+      let cls = 'cal-scheduled';
+      let scoreText = '';
+      if (m.state === 'post') { cls = 'cal-final'; scoreText = ` ${m.hScore}-${m.aScore}`; }
+      else if (m.state === 'in') { cls = 'cal-live'; scoreText = ` ${m.hScore}-${m.aScore}`; }
+      html += `<div class="cal-match ${cls}" data-league="${m.leagueId}" onclick="selectCalMatch(event,'${dateStr}','${m.leagueId}')">${m.home} v ${m.away}${scoreText}</div>`;
+    }
+    if (matches.length > maxShow) {
+      html += `<div class="cal-more">+${matches.length - maxShow} more</div>`;
+    }
+    cell.innerHTML = html;
+  });
+}
+
+function selectCalMatch(e, dateStr, leagueId) {
+  e.stopPropagation(); // prevent cal-cell click from firing
+  const y = parseInt(dateStr.substring(0,4));
+  const m = parseInt(dateStr.substring(4,6)) - 1;
+  const d = parseInt(dateStr.substring(6,8));
+  currentDate = new Date(y, m, d);
+  currentLeague = leagueId;
+  updateDateDisplay();
+  renderTabs();
+  loadAll();
+  document.getElementById('calendarOverlay').classList.remove('show');
+}
+
+function selectCalDate(y, m, d) {
+  currentDate = new Date(y, m, d);
+  updateDateDisplay();
+  loadAll();
+  document.getElementById('calendarOverlay').classList.remove('show');
+}
+
+// ===== TIMEZONE HELPERS =====
+const LEAGUE_TZ = {
+  'eng.1':          { tz: 'Europe/London',   label: 'ENG' },
+  'esp.1':          { tz: 'Europe/Madrid',   label: 'ESP' },
+  'ger.1':          { tz: 'Europe/Berlin',   label: 'GER' },
+  'ita.1':          { tz: 'Europe/Rome',     label: 'ITA' },
+  'fra.1':          { tz: 'Europe/Paris',    label: 'FRA' },
+  'uefa.champions': { tz: 'Europe/London',   label: 'UK' },
+  'uefa.europa':    { tz: 'Europe/London',   label: 'UK' },
+  'eng.fa':         { tz: 'Europe/London',   label: 'ENG' },
+  'fifa.world':     { tz: 'Europe/London',   label: 'UK' },
+};
+
+function getTimeInTZ(dateStr, timezone) {
+  const d = new Date(dateStr);
+  return d.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit', timeZone: timezone });
+}
+function getUKTime(dateStr) {
+  return getTimeInTZ(dateStr, 'Europe/London');
+}
+function getLocalTime(dateStr) {
+  const d = new Date(dateStr);
+  return d.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
+}
+function getVenueTime(dateStr, leagueId) {
+  const info = LEAGUE_TZ[leagueId];
+  if (!info) return null;
+  return { time: getTimeInTZ(dateStr, info.tz), label: info.label };
+}
+
+// ===== FETCH =====
+async function fetchESPN(league, dateStr) {
+  try {
+    const r = await fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/${league}/scoreboard?dates=${dateStr}`);
+    return r.ok ? await r.json() : null;
+  } catch(e) { return null; }
+}
+async function fetchStandings(league) {
+  try {
+    const r = await fetch(`https://site.api.espn.com/apis/v2/sports/soccer/${league}/standings`);
+    return r.ok ? await r.json() : null;
+  } catch(e) { return null; }
+}
+
+// ===== LOAD ALL (matches + standings together) =====
+async function loadAll() {
+  loadMatches();
+  loadStandings();
+}
+
+async function loadMatches() {
+  const panel = document.getElementById('matchesPanel');
+  panel.innerHTML = '<div class="loading"><div class="spinner"></div>Loading...</div>';
+  const dateStr = getDateStr(currentDate);
+  const leagues = currentLeague === 'all' ? ALL_SINGLE : LEAGUES.filter(l => l.id === currentLeague);
+
+  // "All" 모드일 때 컵 대회 경기 유무 체크 (탭 표시용)
+  let allResults;
+  if (currentLeague === 'all') {
+    allResults = await Promise.all(
+      ALL_SINGLE.map(async lg => ({ league: lg, data: await fetchESPN(lg.espn, dateStr) }))
+    );
+    // 컵 대회 탭 표시 업데이트
+    cupLeaguesWithMatches.clear();
+    for (const { league, data } of allResults) {
+      if (CUP_ONLY_LEAGUES.includes(league.id) && data?.events?.length) {
+        cupLeaguesWithMatches.add(league.id);
+      }
+    }
+    renderTabs();
+  }
+
+  const results = allResults || await Promise.all(
+    leagues.map(async lg => ({ league: lg, data: await fetchESPN(lg.espn, dateStr) }))
+  );
+
+  let html = '';
+  let total = 0;
+
+  for (const { league, data } of results) {
+    if (!data?.events?.length) continue;
+    const lName = data.leagues?.[0]?.name || league.name;
+    const lLogo = data.leagues?.[0]?.logos?.[0]?.href || '';
+    html += `<div class="match-group-title">
+      ${lLogo ? `<img src="${lLogo}" alt="">` : ''} ${lName}
+    </div>`;
+
+    for (const event of data.events) {
+      total++;
+      const comp = event.competitions?.[0];
+      if (!comp) continue;
+      const st = comp.status;
+      const isLive = st?.type?.state === 'in';
+      const isFinal = st?.type?.state === 'post';
+      const isPre = st?.type?.state === 'pre';
+
+      const home = comp.competitors?.find(c => c.homeAway === 'home');
+      const away = comp.competitors?.find(c => c.homeAway === 'away');
+      if (!home || !away) continue;
+
+      const hScore = parseInt(home.score)||0, aScore = parseInt(away.score)||0;
+      const hWin = isFinal && hScore > aScore, aWin = isFinal && aScore > hScore;
+
+      // Time display
+      let timeHtml = '';
+      let stClass = '', stText = '';
+
+      if (isPre) {
+        const uk = getUKTime(event.date);
+        const venue = getVenueTime(event.date, league.espn);
+        timeHtml = '';  // left side empty for scheduled
+        stClass = 'scheduled-time';
+        stText = `<span class="time-uk">UK ${uk}</span>`;
+        if (venue && venue.label !== 'UK' && venue.label !== 'ENG') {
+          stText += `<span class="time-venue">${venue.label} ${venue.time}</span>`;
+        }
+      } else if (isLive) {
+        timeHtml = st?.displayClock || 'LIVE';
+        stClass = 'live'; stText = st?.type?.shortDetail || 'LIVE';
+      } else {
+        timeHtml = 'FT';
+        stClass = 'ft'; stText = st?.type?.shortDetail || 'FT';
+      }
+
+      // Match details (goals, cards)
+      let detailsHtml = '';
+      const details = comp.details || [];
+      if (details.length > 0 && !isPre) {
+        detailsHtml = '<div class="match-details">';
+        for (const det of details) {
+          const typeName = det.type?.text || '';
+          const player = det.athletesInvolved?.[0]?.displayName || '';
+          const minute = det.clock?.displayValue || '';
+          let icon = '', cls = '';
+
+          if (typeName.includes('Goal') || typeName.includes('Penalty - Scored')) {
+            icon = '⚽'; cls = 'detail-goal';
+          } else if (typeName.includes('Own Goal')) {
+            icon = '⚽'; cls = 'detail-red';
+          } else if (typeName.includes('Yellow')) {
+            icon = '🟨'; cls = 'detail-yellow';
+          } else if (typeName.includes('Red') || typeName.includes('Second Yellow')) {
+            icon = '🟥'; cls = 'detail-red';
+          } else {
+            continue;
+          }
+
+          if (player) {
+            const ogTag = typeName.includes('Own Goal') ? ' (OG)' : '';
+            const penTag = typeName.includes('Penalty') ? ' (P)' : '';
+            detailsHtml += `<div class="match-detail-row">
+              <span class="detail-icon">${icon}</span>
+              <span class="detail-minute">${minute}'</span>
+              <span class="detail-player ${cls}">${player}${ogTag}${penTag}</span>
+            </div>`;
+          }
+        }
+        detailsHtml += '</div>';
+      }
+
+      const canDetail = !isPre; // can open detail modal for live + finished matches
+      const clickClass = canDetail ? 'clickable' : '';
+      const eventId = event.id || '';
+      const clickHandler = canDetail ? `onclick="openMatchDetail('${league.espn}','${eventId}',event)"` : '';
+      const hintHtml = canDetail ? '<div class="match-expand-hint">tap for full details</div>' : '';
+
+      html += `<div class="match-card ${isLive ? 'live' : ''} ${clickClass}" ${clickHandler}>
+        <div class="match-main">
+          <div class="match-time ${isLive ? 'live-time' : ''}">${timeHtml}</div>
+          <div class="match-teams">
+            <div class="match-team ${hWin?'winner':(aWin?'loser':'')}">
+              <img src="${home.team?.logo||''}" alt="" onerror="this.style.display='none'">
+              <span class="name">${home.team?.shortDisplayName||home.team?.displayName||'?'}</span>
+              ${!isPre ? `<span class="score">${home.score}</span>` : ''}
+            </div>
+            <div class="match-team ${aWin?'winner':(hWin?'loser':'')}">
+              <img src="${away.team?.logo||''}" alt="" onerror="this.style.display='none'">
+              <span class="name">${away.team?.shortDisplayName||away.team?.displayName||'?'}</span>
+              ${!isPre ? `<span class="score">${away.score}</span>` : ''}
+            </div>
+          </div>
+          <div class="match-status ${stClass}">${stText}</div>
+        </div>
+        ${hintHtml}
+        ${detailsHtml}
+      </div>`;
+    }
+  }
+
+  if (total === 0) {
+    html = '<div class="no-matches"><div class="icon">⚽</div>No matches on this day.<br>Try another date!</div>';
+  }
+  panel.innerHTML = html;
+}
+
+async function loadStandings() {
+  const panel = document.getElementById('standingsPanel');
+  panel.innerHTML = '<div class="loading"><div class="spinner"></div>Loading...</div>';
+
+  let league;
+  if (currentLeague === 'all') {
+    league = LEAGUES.find(l => l.id === 'eng.1');
+  } else {
+    league = LEAGUES.find(l => l.id === currentLeague);
+  }
+
+  if (!league?.espn) {
+    panel.innerHTML = '<div class="no-matches"><div class="icon">📊</div>Select a league to view standings.</div>';
+    return;
+  }
+
+  // 토너먼트(컵) 대회는 리그 순위표가 없음
+  const CUP_LEAGUES = ['eng.fa', 'fifa.world'];
+  if (CUP_LEAGUES.includes(league.espn)) {
+    panel.innerHTML = '<div class="no-matches"><div class="icon">🏆</div>Cup tournament — no league table.<br><small>Match results are shown on the left.</small></div>';
+    return;
+  }
+
+  const data = await fetchStandings(league.espn);
+  if (!data?.children?.[0]) {
+    panel.innerHTML = '<div class="no-matches"><div class="icon">📊</div>Standings not available.</div>';
+    return;
+  }
+
+  const entries = data.children[0]?.standings?.entries || [];
+  if (!entries.length) {
+    panel.innerHTML = '<div class="no-matches"><div class="icon">📊</div>No data.</div>';
+    return;
+  }
+
+  entries.sort((a,b) => {
+    const ra = a.stats?.find(s=>s.name==='rank')?.value||99;
+    const rb = b.stats?.find(s=>s.name==='rank')?.value||99;
+    return ra - rb;
+  });
+
+  const total = entries.length;
+  let html = `<table class="standings-table"><thead><tr>
+    <th>#</th><th>Team</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GD</th><th>Pts</th>
+  </tr></thead><tbody>`;
+
+  for (const e of entries) {
+    const t = e.team, s = {};
+    (e.stats||[]).forEach(x => { s[x.name] = x.value; });
+    const rank = s.rank||'-', p = s.gamesPlayed||0, w = s.wins||0;
+    const d = s.ties||0, l = s.losses||0;
+    const gd = s.pointDifferential||s.goalDifference||0, pts = s.points||0;
+    let cls = '';
+    if (rank <= 4) cls = `pos-${rank}`;
+    if (rank > total - 3) cls = 'pos-rel';
+    html += `<tr class="${cls}">
+      <td>${rank}</td>
+      <td><div class="team-cell">
+        <img src="${t?.logos?.[0]?.href||''}" alt="" onerror="this.style.display='none'">
+        ${t?.shortDisplayName||t?.displayName||'?'}
+      </div></td>
+      <td>${p}</td><td>${w}</td><td>${d}</td><td>${l}</td>
+      <td>${gd>0?'+':''}${gd}</td><td class="pts">${pts}</td>
+    </tr>`;
+  }
+  html += '</tbody></table>';
+  panel.innerHTML = html;
+}
+
+// ===== MATCH DETAIL MODAL =====
+async function fetchMatchSummary(league, eventId) {
+  try {
+    const r = await fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/${league}/summary?event=${eventId}`);
+    return r.ok ? await r.json() : null;
+  } catch(e) { return null; }
+}
+
+function openMatchDetail(league, eventId, e) {
+  if (e) e.stopPropagation();
+  const overlay = document.getElementById('detailOverlay');
+  const content = document.getElementById('detailContent');
+  content.innerHTML = '<div class="detail-loading"><div class="spinner"></div>Loading match details...</div>';
+  overlay.classList.add('show');
+  fetchMatchSummary(league, eventId).then(data => renderMatchDetail(data, league));
+}
+
+function closeDetail(e) {
+  if (e && e.target !== document.getElementById('detailOverlay')) return;
+  document.getElementById('detailOverlay').classList.remove('show');
+}
+
+function renderMatchDetail(data, league) {
+  const content = document.getElementById('detailContent');
+  if (!data) {
+    content.innerHTML = '<div class="detail-loading">Could not load match details.</div>';
+    return;
+  }
+
+  const header = data.header;
+  const comp = header?.competitions?.[0];
+  if (!comp) { content.innerHTML = '<div class="detail-loading">No data available.</div>'; return; }
+
+  const competitors = comp.competitors || [];
+  const home = competitors.find(c => c.homeAway === 'home') || competitors[0];
+  const away = competitors.find(c => c.homeAway === 'away') || competitors[1];
+  const status = comp.status;
+  const leagueName = header?.league?.name || league;
+
+  // Score header
+  const statusText = status?.type?.shortDetail || 'FT';
+  let scoreHtml = `
+    <div class="detail-score-header">
+      <button class="detail-modal-close" onclick="document.getElementById('detailOverlay').classList.remove('show')">✕</button>
+      <div class="detail-league-name">${leagueName}</div>
+      <div class="detail-teams-row">
+        <div class="detail-team-col">
+          <img src="${home?.team?.logos?.[0]?.href||''}" alt="" onerror="this.style.display='none'">
+          <div class="t-name">${home?.team?.displayName||'?'}</div>
+        </div>
+        <div class="detail-score-box">
+          ${home?.score||0}<span class="score-sep">-</span>${away?.score||0}
+        </div>
+        <div class="detail-team-col">
+          <img src="${away?.team?.logos?.[0]?.href||''}" alt="" onerror="this.style.display='none'">
+          <div class="t-name">${away?.team?.displayName||'?'}</div>
+        </div>
+      </div>
+      <div class="detail-match-info">${statusText}</div>
+    </div>`;
+
+  // Tabs
+  let tabsHtml = `<div class="detail-tabs">
+    <div class="detail-tab active" onclick="switchDetailTab(this,'stats')">Stats</div>
+    <div class="detail-tab" onclick="switchDetailTab(this,'events')">Events</div>
+    <div class="detail-tab" onclick="switchDetailTab(this,'lineups')">Lineups</div>
+  </div>`;
+
+  // ===== STATS TAB =====
+  let statsHtml = '<div class="detail-tab-content active" id="dtab-stats">';
+  const boxscore = data.boxscore;
+  if (boxscore?.teams?.length >= 2) {
+    const homeStats = {};
+    const awayStats = {};
+    (boxscore.teams[0]?.statistics || []).forEach(s => { homeStats[s.name] = s.displayValue; });
+    (boxscore.teams[1]?.statistics || []).forEach(s => { awayStats[s.name] = s.displayValue; });
+
+    // If teams are swapped (check which is home)
+    const bHome = boxscore.teams.find(t => t.homeAway === 'home') || boxscore.teams[0];
+    const bAway = boxscore.teams.find(t => t.homeAway === 'away') || boxscore.teams[1];
+    const hS = {}, aS = {};
+    (bHome.statistics || []).forEach(s => { hS[s.name] = s.displayValue; });
+    (bAway.statistics || []).forEach(s => { aS[s.name] = s.displayValue; });
+
+    const statsList = [
+      ['possessionPct', 'Possession %'],
+      ['totalShots', 'Total Shots'],
+      ['shotsOnTarget', 'Shots on Target'],
+      ['cornerKicks', 'Corners'],
+      ['foulsCommitted', 'Fouls'],
+      ['offsides', 'Offsides'],
+      ['wonCorners', 'Corners Won'],
+      ['saves', 'Saves'],
+      ['yellowCards', 'Yellow Cards'],
+      ['redCards', 'Red Cards'],
+    ];
+
+    for (const [key, label] of statsList) {
+      const hv = hS[key], av = aS[key];
+      if (hv === undefined && av === undefined) continue;
+      const hn = parseFloat(hv)||0, an = parseFloat(av)||0;
+      const total = hn + an || 1;
+      const hp = (hn/total*100).toFixed(0), ap = (an/total*100).toFixed(0);
+      statsHtml += `<div class="stat-row">
+        <span class="stat-val">${hv||0}</span>
+        <div class="stat-bar-wrap left"><div class="stat-bar home" style="width:${hp}%"></div></div>
+        <span class="stat-label">${label}</span>
+        <div class="stat-bar-wrap"><div class="stat-bar away" style="width:${ap}%"></div></div>
+        <span class="stat-val">${av||0}</span>
+      </div>`;
+    }
+  } else {
+    statsHtml += '<div style="text-align:center;color:#999;padding:20px;">Stats not available</div>';
+  }
+  statsHtml += '</div>';
+
+  // ===== EVENTS TAB =====
+  let eventsHtml = '<div class="detail-tab-content" id="dtab-events">';
+  const keyEvents = data.keyEvents || [];
+  const allDetails = comp.details || data.header?.competitions?.[0]?.details || [];
+
+  // Try keyEvents first, fallback to details
+  if (keyEvents.length > 0) {
+    for (const ev of keyEvents) {
+      const play = ev.play || ev;
+      const typeName = play.type?.text || ev.text || '';
+      const minute = play.clock?.displayValue || ev.clock?.displayValue || '';
+      const participants = play.participants || [];
+      const playerName = participants[0]?.athlete?.displayName || '';
+      const teamId = play.team?.id || '';
+
+      let icon = '📋', eventText = typeName;
+      if (typeName.includes('Goal') || typeName.includes('Penalty - Scored')) {
+        icon = '⚽'; eventText = playerName ? `${playerName} scores!` : 'Goal!';
+      } else if (typeName.includes('Own Goal')) {
+        icon = '⚽'; eventText = playerName ? `${playerName} (OG)` : 'Own Goal';
+      } else if (typeName.includes('Yellow')) {
+        icon = '🟨'; eventText = playerName || 'Yellow Card';
+      } else if (typeName.includes('Red') || typeName.includes('Second Yellow')) {
+        icon = '🟥'; eventText = playerName || 'Red Card';
+      } else if (typeName.includes('Substitution')) {
+        icon = '🔄'; eventText = playerName ? `${playerName}` : 'Substitution';
+      } else if (typeName.includes('Penalty - Missed') || typeName.includes('Penalty - Saved')) {
+        icon = '❌'; eventText = playerName ? `${playerName} penalty missed` : 'Penalty missed';
+      }
+
+      const isHome = teamId === (home?.team?.id || '');
+      const teamTag = teamId ? `<span class="event-team-tag ${isHome?'home':'away'}">${isHome ? (home?.team?.abbreviation||'HOME') : (away?.team?.abbreviation||'AWAY')}</span>` : '';
+
+      eventsHtml += `<div class="event-row">
+        <span class="event-min">${minute}'</span>
+        <span class="event-icon">${icon}</span>
+        <span class="event-text">${eventText}</span>
+        ${teamTag}
+      </div>`;
+    }
+  } else if (allDetails.length > 0) {
+    // Fallback to comp.details
+    for (const det of allDetails) {
+      const typeName = det.type?.text || '';
+      const player = det.athletesInvolved?.[0]?.displayName || '';
+      const minute = det.clock?.displayValue || '';
+      let icon = '📋';
+      if (typeName.includes('Goal')) icon = '⚽';
+      else if (typeName.includes('Yellow')) icon = '🟨';
+      else if (typeName.includes('Red')) icon = '🟥';
+      else if (typeName.includes('Substitution')) icon = '🔄';
+
+      const teamObj = det.team;
+      const isHome = teamObj?.id === (home?.team?.id || '');
+      const teamTag = teamObj ? `<span class="event-team-tag ${isHome?'home':'away'}">${teamObj.abbreviation||''}</span>` : '';
+
+      eventsHtml += `<div class="event-row">
+        <span class="event-min">${minute}'</span>
+        <span class="event-icon">${icon}</span>
+        <span class="event-text">${player || typeName}</span>
+        ${teamTag}
+      </div>`;
+    }
+  } else {
+    eventsHtml += '<div style="text-align:center;color:#999;padding:20px;">No events data</div>';
+  }
+  eventsHtml += '</div>';
+
+  // ===== LINEUPS TAB =====
+  let lineupsHtml = '<div class="detail-tab-content" id="dtab-lineups">';
+  const rosters = data.rosters || [];
+  if (rosters.length >= 2) {
+    for (const roster of rosters) {
+      const team = roster.team;
+      const isH = team?.id === (home?.team?.id || '');
+      const formation = roster.formation || '';
+      lineupsHtml += `<div class="lineup-section">
+        <div class="lineup-title">
+          <img src="${team?.logos?.[0]?.href||''}" alt="" onerror="this.style.display='none'">
+          ${team?.displayName||'?'}
+          ${formation ? `<span class="lineup-formation">(${formation})</span>` : ''}
+        </div>`;
+
+      const starters = (roster.roster || []).filter(p => p.starter);
+      const subs = (roster.roster || []).filter(p => !p.starter);
+
+      for (const p of starters) {
+        const num = p.jersey || '';
+        const name = p.athlete?.displayName || p.displayName || '?';
+        const pos = p.position?.abbreviation || '';
+        lineupsHtml += `<div class="lineup-player">
+          <span class="lineup-number">${num}</span>
+          <span>${name}</span>
+          <span style="color:#999;font-size:10px;margin-left:auto;">${pos}</span>
+        </div>`;
+      }
+
+      if (subs.length > 0) {
+        lineupsHtml += '<div class="lineup-sub-label">Substitutes</div>';
+        for (const p of subs) {
+          const num = p.jersey || '';
+          const name = p.athlete?.displayName || p.displayName || '?';
+          const pos = p.position?.abbreviation || '';
+          lineupsHtml += `<div class="lineup-player" style="opacity:0.7;">
+            <span class="lineup-number" style="background:#f5f5f5;color:#888;">${num}</span>
+            <span>${name}</span>
+            <span style="color:#bbb;font-size:10px;margin-left:auto;">${pos}</span>
+          </div>`;
+        }
+      }
+      lineupsHtml += '</div>';
+    }
+  } else {
+    lineupsHtml += '<div style="text-align:center;color:#999;padding:20px;">Lineups not available</div>';
+  }
+  lineupsHtml += '</div>';
+
+  content.innerHTML = scoreHtml + tabsHtml + statsHtml + eventsHtml + lineupsHtml;
+}
+
+function switchDetailTab(el, tabId) {
+  // Deactivate all tabs
+  el.parentElement.querySelectorAll('.detail-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  // Show correct content
+  document.querySelectorAll('.detail-tab-content').forEach(c => c.classList.remove('active'));
+  const target = document.getElementById('dtab-' + tabId);
+  if (target) target.classList.add('active');
+}
+
+// ===== AUTO REFRESH =====
+function startRefreshTimer() {
+  if (refreshInterval) clearInterval(refreshInterval);
+  refreshCount = 60;
+  refreshInterval = setInterval(() => {
+    refreshCount--;
+    document.getElementById('refreshTimer').textContent = `${refreshCount}s`;
+    if (refreshCount <= 0) { refreshCount = 60; loadAll(); }
+  }, 1000);
+}
+
+// ===== KIOSK MODE =====
+document.addEventListener('click', function(e) {
+  const a = e.target.closest('a');
+  if (a) { const h = a.getAttribute('href');
+    if (h && (h.startsWith('http')||h.startsWith('//')||h.startsWith('mailto')))
+    { e.preventDefault(); e.stopPropagation(); return false; }
+  }
+}, true);
+window.open = function() { return null; };
+document.addEventListener('contextmenu', e => { e.preventDefault(); });
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey||e.metaKey) && ['t','n','l','w'].includes(e.key.toLowerCase()))
+  { e.preventDefault(); }
+});
+document.addEventListener('dragstart', e => e.preventDefault());
+let fsReq = false;
+document.addEventListener('click', () => {
+  if (!fsReq && document.documentElement.requestFullscreen) {
+    document.documentElement.requestFullscreen().catch(()=>{});
+    fsReq = true;
+  } else if (!fsReq && document.documentElement.webkitRequestFullscreen) {
+    document.documentElement.webkitRequestFullscreen();
+    fsReq = true;
+  }
+}, { once: true });
+document.addEventListener('gesturestart', e => e.preventDefault());
+document.addEventListener('gesturechange', e => e.preventDefault());
+window.addEventListener('popstate', () => history.pushState(null,'',window.location.href));
+history.pushState(null,'',window.location.href);
+
+// ===== SCREEN TIME GUARDIAN =====
+// 10분 연속 사용 시 첫 경고, OK 누른 후 1분마다 반복
+// 3번째 경고 후 OK → 완전 잠금 (패스워드 필요)
+// 1시간 이상 비활성(탭 숨김/화면꺼짐) 시 타이머 리셋
+const SCREEN_FIRST_ALERT = 10 * 60 * 1000;   // 10분
+const SCREEN_REPEAT_ALERT = 1 * 60 * 1000;    // 1분
+const SCREEN_IDLE_RESET = 60 * 60 * 1000;     // 1시간
+const SCREEN_MAX_WARNS = 3;                    // 3번 경고 후 잠금
+const SCREEN_LOCK_PIN = '7479';                // 잠금 해제 패스워드
+
+let screenStartTime = Date.now();
+let screenAlertTimer = null;
+let screenAlertCount = 0;
+let screenHiddenTime = null;
+let screenLocked = false;
+
+function startScreenTimer() {
+  if (screenLocked) return;
+  clearTimeout(screenAlertTimer);
+  screenStartTime = Date.now();
+  screenAlertCount = 0;
+  scheduleScreenAlert(SCREEN_FIRST_ALERT);
+}
+
+function scheduleScreenAlert(delay) {
+  if (screenLocked) return;
+  clearTimeout(screenAlertTimer);
+  screenAlertTimer = setTimeout(() => {
+    showScreenAlert();
+  }, delay);
+}
+
+function showScreenAlert() {
+  screenAlertCount++;
+  const totalMin = Math.round((Date.now() - screenStartTime) / 60000);
+  const overlay = document.getElementById('screenAlertOverlay');
+  const msg = document.getElementById('screenAlertMsg');
+  const sub = document.getElementById('screenAlertSub');
+  const warn = document.getElementById('screenAlertWarn');
+
+  const remaining = SCREEN_MAX_WARNS - screenAlertCount;
+
+  if (screenAlertCount === 1) {
+    msg.innerHTML = '연성아 너무 오래 보고 있다..<br>여기까지만 봐';
+    warn.textContent = `⚠️ 경고 ${screenAlertCount}/${SCREEN_MAX_WARNS} — ${remaining}번 더 무시하면 잠금됩니다`;
+  } else if (screenAlertCount === 2) {
+    msg.innerHTML = '연성아~ 아직도 보고 있네?<br>이제 진짜 그만 봐!';
+    warn.textContent = `⚠️ 경고 ${screenAlertCount}/${SCREEN_MAX_WARNS} — ${remaining}번 더 무시하면 잠금됩니다`;
+  } else {
+    msg.innerHTML = '연성아!! 마지막 경고야!! 😤<br>OK 누르면 잠금된다!';
+    warn.textContent = '🔒 마지막 기회! OK 누르면 잠금됩니다';
+    warn.style.fontWeight = '700';
+  }
+  sub.textContent = `${totalMin}분째 보고 있어요`;
+  overlay.classList.add('show');
+}
+
+function dismissScreenAlert() {
+  document.getElementById('screenAlertOverlay').classList.remove('show');
+
+  if (screenAlertCount >= SCREEN_MAX_WARNS) {
+    // 3번 경고 모두 소진 → 잠금!
+    activateLock();
+  } else {
+    // 아직 기회 남음 → 1분 후 다시 경고
+    scheduleScreenAlert(SCREEN_REPEAT_ALERT);
+  }
+}
+
+function activateLock() {
+  screenLocked = true;
+  clearTimeout(screenAlertTimer);
+  const totalMin = Math.round((Date.now() - screenStartTime) / 60000);
+  document.getElementById('screenLockSub').textContent = `총 ${totalMin}분 사용 · 아빠한테 말해서 풀어달라고 해`;
+  document.getElementById('screenLockInput').value = '';
+  document.getElementById('screenLockError').textContent = '';
+  document.getElementById('screenLockOverlay').classList.add('show');
+}
+
+function unlockScreen() {
+  const input = document.getElementById('screenLockInput');
+  const error = document.getElementById('screenLockError');
+  if (input.value === SCREEN_LOCK_PIN) {
+    // 해제 성공
+    screenLocked = false;
+    document.getElementById('screenLockOverlay').classList.remove('show');
+    input.value = '';
+    error.textContent = '';
+    // 타이머 완전 리셋
+    startScreenTimer();
+  } else {
+    error.textContent = '비밀번호가 틀렸어요!';
+    input.value = '';
+    input.focus();
+    // 틀리면 잠깐 흔들기
+    const box = input.closest('.screen-lock-box');
+    box.style.animation = 'none';
+    box.offsetHeight;
+    box.style.animation = 'shake 0.4s ease-out';
+  }
+}
+
+// 탭 숨김/표시 감지
+document.addEventListener('visibilitychange', () => {
+  if (screenLocked) return;
+  if (document.hidden) {
+    screenHiddenTime = Date.now();
+    clearTimeout(screenAlertTimer);
+  } else {
+    if (screenHiddenTime) {
+      const away = Date.now() - screenHiddenTime;
+      if (away >= SCREEN_IDLE_RESET) {
+        startScreenTimer();
+      } else {
+        const elapsed = Date.now() - screenStartTime;
+        if (screenAlertCount === 0 && elapsed < SCREEN_FIRST_ALERT) {
+          scheduleScreenAlert(SCREEN_FIRST_ALERT - elapsed);
+        } else if (screenAlertCount > 0) {
+          scheduleScreenAlert(SCREEN_REPEAT_ALERT);
+        }
+      }
+      screenHiddenTime = null;
+    }
+  }
+});
+
+// 시작
+startScreenTimer();
+
+// ===== SERVICE WORKER =====
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(()=>{});
+}
+
+init();
+</script>
+</body>
+</html>
