@@ -58,6 +58,14 @@
       transition: transform 0.3s;
     }
     .refresh-btn:hover { background: #1d4ed8; }
+    .nav-app-btn {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 700;
+      background: linear-gradient(135deg, #1a1a2e, #0f3460); color: #fff;
+      text-decoration: none; transition: transform 0.2s, box-shadow 0.2s;
+      border: 1px solid #2563eb;
+    }
+    .nav-app-btn:hover { transform: scale(1.05); box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
     .refresh-btn.spinning { animation: spin 0.8s linear infinite; }
 
     /* World Cup D-day Banner */
@@ -506,6 +514,97 @@
       color: #ff4444; font-size: 13px; margin-top: 10px;
       min-height: 18px;
     }
+    .screen-lock-divider {
+      display: flex; align-items: center; gap: 12px; margin: 20px 0;
+      color: #666; font-size: 12px;
+    }
+    .screen-lock-divider::before, .screen-lock-divider::after {
+      content: ''; flex: 1; height: 1px; background: #333;
+    }
+    .quiz-challenge-btn {
+      display: block; width: 100%; padding: 14px; border-radius: 14px;
+      border: 2px solid #2ecc71; background: rgba(46,204,113,0.1);
+      color: #2ecc71; font-size: 15px; font-weight: 700; cursor: pointer;
+      transition: all 0.3s; margin-top: 4px;
+    }
+    .quiz-challenge-btn:hover { background: rgba(46,204,113,0.25); }
+    /* Quiz Panel */
+    .quiz-panel {
+      display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(135deg, #0a0a2e 0%, #1a1a3e 100%);
+      z-index: 700; overflow-y: auto;
+      padding: 20px;
+    }
+    .quiz-panel.show { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .quiz-box {
+      width: 400px; max-width: 95vw;
+    }
+    .quiz-header {
+      text-align: center; margin-bottom: 20px;
+    }
+    .quiz-header-icon { font-size: 40px; }
+    .quiz-header-title { font-size: 20px; font-weight: 700; color: #fff; margin: 8px 0 4px; }
+    .quiz-header-sub { font-size: 13px; color: #888; }
+    .quiz-progress {
+      display: flex; gap: 4px; margin-bottom: 20px;
+    }
+    .quiz-dot {
+      flex: 1; height: 6px; border-radius: 3px; background: #333;
+      transition: background 0.3s;
+    }
+    .quiz-dot.correct { background: #2ecc71; }
+    .quiz-dot.wrong { background: #e74c3c; }
+    .quiz-dot.current { background: #f5a623; animation: pulse 1s infinite; }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+    .quiz-question-num { font-size: 12px; color: #888; margin-bottom: 8px; text-align: center; }
+    .quiz-word {
+      font-size: 32px; font-weight: 700; color: #fff; text-align: center;
+      margin-bottom: 6px; padding: 16px; background: rgba(255,255,255,0.05);
+      border-radius: 14px; border: 1px solid #333;
+    }
+    .quiz-hint { font-size: 13px; color: #7b2ff7; text-align: center; margin-bottom: 16px; font-style: italic; }
+    .quiz-options {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px;
+    }
+    .quiz-option {
+      padding: 14px 12px; border-radius: 12px; border: 2px solid #333;
+      background: rgba(255,255,255,0.05); color: #fff;
+      font-size: 15px; font-weight: 600; cursor: pointer;
+      text-align: center; transition: all 0.2s;
+    }
+    .quiz-option:hover { border-color: #2563eb; background: rgba(37,99,235,0.1); }
+    .quiz-option.selected { border-color: #2563eb; background: rgba(37,99,235,0.2); }
+    .quiz-option.correct { border-color: #2ecc71; background: rgba(46,204,113,0.2); color: #2ecc71; }
+    .quiz-option.wrong { border-color: #e74c3c; background: rgba(231,76,60,0.2); color: #e74c3c; }
+    .quiz-option:disabled { cursor: default; }
+    .quiz-score-display {
+      text-align: center; font-size: 14px; color: #aaa; margin-bottom: 10px;
+    }
+    /* Quiz Result */
+    .quiz-result {
+      text-align: center; padding: 20px;
+    }
+    .quiz-result-icon { font-size: 60px; margin-bottom: 12px; }
+    .quiz-result-title { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+    .quiz-result-title.pass { color: #2ecc71; }
+    .quiz-result-title.fail { color: #e74c3c; }
+    .quiz-result-score { font-size: 16px; color: #aaa; margin-bottom: 8px; }
+    .quiz-result-msg { font-size: 14px; color: #888; margin-bottom: 20px; line-height: 1.6; }
+    .quiz-result-btn {
+      padding: 12px 30px; border-radius: 30px; border: none;
+      font-size: 16px; font-weight: 700; cursor: pointer; margin: 6px;
+    }
+    .quiz-result-btn.unlock { background: #2ecc71; color: #fff; }
+    .quiz-result-btn.retry { background: #2563eb; color: #fff; }
+    .quiz-result-btn.back { background: #444; color: #fff; }
+    .settings-menu-btn {
+      display: block; width: 100%; padding: 14px 20px; margin-bottom: 10px;
+      border: 1px solid #e0e0e0; border-radius: 12px; background: #f8f9fa;
+      font-size: 16px; font-weight: 600; color: #1a1a1a;
+      cursor: pointer; text-align: left; transition: background 0.2s;
+    }
+    .settings-menu-btn:hover { background: #e8eaed; }
+    .settings-menu-btn:last-child { margin-bottom: 0; }
     @keyframes shake {
       0%, 100% { transform: translateX(0); }
       20% { transform: translateX(-12px); }
@@ -534,9 +633,12 @@
   <div class="header">
     <h1>⚽ Football Info for <span>Yeon-Sung</span></h1>
     <div class="header-right">
+      <a href="chess-yeonseong.html" class="nav-app-btn" title="체스 하기">♟️ Chess</a>
+      <a href="tetris-yeonseong.html" class="nav-app-btn" title="테트리스" style="background:linear-gradient(135deg,#7b2ff7,#0a1a3e);border-color:#7b2ff7;">🧱 Tetris</a>
       <span id="dataSource">ESPN</span>
       <span class="refresh-timer" id="refreshTimer">60s</span>
       <button class="refresh-btn" id="refreshBtn" onclick="manualRefresh()" title="Refresh">🔄</button>
+      <button class="refresh-btn" onclick="openSettings()" title="Settings" style="background:#6b7280;">⚙️</button>
     </div>
   </div>
 
@@ -613,6 +715,67 @@
              onkeydown="if(event.key==='Enter')unlockScreen()">
       <button class="screen-lock-submit" onclick="unlockScreen()">잠금 해제</button>
       <div class="screen-lock-error" id="screenLockError"></div>
+      <div class="screen-lock-divider">또는</div>
+      <button class="quiz-challenge-btn" onclick="startFrenchQuiz()">
+        🇫🇷 프랑스어 퀴즈 도전!<br>
+        <span style="font-size:12px;font-weight:400;color:#aaa;">10문제 중 8개 맞추면 10분 더!</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- French Quiz Panel -->
+  <div class="quiz-panel" id="quizPanel">
+    <div class="quiz-box">
+      <div class="quiz-header">
+        <div class="quiz-header-icon">🇫🇷</div>
+        <div class="quiz-header-title">프랑스어 퀴즈 | French Quiz</div>
+        <div class="quiz-header-sub">10문제 중 8개 맞추면 10분 추가!</div>
+      </div>
+      <div class="quiz-progress" id="quizProgress"></div>
+      <div id="quizBody">
+        <div class="quiz-question-num" id="quizNum"></div>
+        <div class="quiz-word" id="quizWord"></div>
+        <div class="quiz-hint" id="quizHint"></div>
+        <div class="quiz-options" id="quizOptions"></div>
+        <div class="quiz-score-display" id="quizScoreDisplay"></div>
+      </div>
+      <div class="quiz-result" id="quizResult" style="display:none;"></div>
+    </div>
+  </div>
+
+  <!-- Settings Modal (password protected) -->
+  <div class="screen-alert-overlay" id="settingsOverlay" onclick="closeSettings(event)">
+    <div class="screen-alert-box" id="settingsBox" onclick="event.stopPropagation()">
+      <div class="screen-alert-icon">⚙️</div>
+      <div class="screen-alert-msg" id="settingsTitle">설정</div>
+      <div id="settingsContent">
+        <!-- Step 1: Password -->
+        <div id="settingsPinStep">
+          <div class="screen-alert-sub">비밀번호를 입력하세요</div>
+          <input type="password" class="screen-lock-input" id="settingsPinInput"
+                 placeholder="••••" maxlength="10" inputmode="numeric"
+                 onkeydown="if(event.key==='Enter')checkSettingsPin()"
+                 style="margin-bottom:12px;">
+          <div class="screen-lock-error" id="settingsPinError"></div>
+          <button class="screen-alert-btn" onclick="checkSettingsPin()">확인</button>
+        </div>
+        <!-- Step 2: Menu -->
+        <div id="settingsMenuStep" style="display:none;">
+          <div style="margin-bottom:16px;padding:12px;background:rgba(255,255,255,0.08);border-radius:12px;">
+            <div style="font-size:14px;color:#aaa;margin-bottom:8px;">⏰ 스크린타임 제한</div>
+            <div style="display:flex;align-items:center;gap:10px;justify-content:center;">
+              <input type="range" id="screenLimitSlider" min="1" max="60" step="1"
+                     style="flex:1;accent-color:#f97316;"
+                     oninput="document.getElementById('screenLimitVal').textContent=this.value+'분'">
+              <span id="screenLimitVal" style="font-size:18px;font-weight:700;color:#f97316;min-width:40px;">10분</span>
+            </div>
+            <button class="settings-menu-btn" onclick="applyScreenLimit()" style="margin-top:8px;background:rgba(249,115,22,0.2);border-color:#f97316;">✅ 적용</button>
+          </div>
+          <button class="settings-menu-btn" onclick="openWifiSettings()">📶 WiFi 설정 열기</button>
+          <button class="settings-menu-btn" onclick="resetScreenTimer()">⏰ 스크린타임 리셋</button>
+          <button class="settings-menu-btn" onclick="closeSettings()">❌ 닫기</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1466,100 +1629,141 @@ window.addEventListener('popstate', () => history.pushState(null,'',window.locat
 history.pushState(null,'',window.location.href);
 
 // ===== SCREEN TIME GUARDIAN =====
-// 10분 연속 사용 시 첫 경고, OK 누른 후 1분마다 반복
-// 3번째 경고 후 OK → 완전 잠금 (패스워드 필요)
-// 1시간 이상 비활성(탭 숨김/화면꺼짐) 시 타이머 리셋
-const SCREEN_FIRST_ALERT = 10 * 60 * 1000;   // 10분
-const SCREEN_REPEAT_ALERT = 1 * 60 * 1000;    // 1분
-const SCREEN_IDLE_RESET = 60 * 60 * 1000;     // 1시간
-const SCREEN_MAX_WARNS = 3;                    // 3번 경고 후 잠금
-const SCREEN_LOCK_PIN = '7479';                // 잠금 해제 패스워드
+// 설정 가능한 사용 시간 → 바로 프랑스어 퀴즈 잠금 → 1시간 후 자동 해제 (또는 패스워드)
+const SCREEN_DEFAULT_MINUTES = 10;
+const SCREEN_LOCK_DURATION = 60 * 60 * 1000;
+const SCREEN_LOCK_PIN = '7479';
+
+// localStorage에서 설정값 로드 (하루 지나면 디폴트로 리셋)
+function loadScreenLimit() {
+  try {
+    const raw = localStorage.getItem('sg_limit');
+    if (raw) {
+      const d = JSON.parse(raw);
+      const savedDate = d.date || '';
+      const today = new Date().toISOString().slice(0, 10);
+      if (savedDate === today && d.minutes >= 1 && d.minutes <= 60) {
+        return d.minutes * 60 * 1000;
+      }
+      // 날짜 다르면 삭제 → 디폴트
+      localStorage.removeItem('sg_limit');
+    }
+  } catch(e) {}
+  return SCREEN_DEFAULT_MINUTES * 60 * 1000;
+}
+function saveScreenLimit(minutes) {
+  try {
+    const today = new Date().toISOString().slice(0, 10);
+    localStorage.setItem('sg_limit', JSON.stringify({ minutes, date: today }));
+  } catch(e) {}
+}
+function getScreenLimitMinutes() {
+  try {
+    const raw = localStorage.getItem('sg_limit');
+    if (raw) {
+      const d = JSON.parse(raw);
+      const today = new Date().toISOString().slice(0, 10);
+      if (d.date === today && d.minutes >= 1 && d.minutes <= 60) return d.minutes;
+    }
+  } catch(e) {}
+  return SCREEN_DEFAULT_MINUTES;
+}
+
+let SCREEN_USE_LIMIT = loadScreenLimit();
 
 let screenStartTime = Date.now();
 let screenAlertTimer = null;
-let screenAlertCount = 0;
-let screenHiddenTime = null;
 let screenLocked = false;
+let screenLockTime = null;
+let screenLockCountdown = null;
+
+// sessionStorage 동기화 (페이지간 시간 공유)
+function sgSave() {
+  try { sessionStorage.setItem('sg_data', JSON.stringify({
+    start: screenStartTime,
+    locked: screenLocked, lockTime: screenLockTime
+  })); } catch(e) {}
+}
+function sgLoad() {
+  try {
+    const raw = sessionStorage.getItem('sg_data');
+    if (!raw) return;
+    const d = JSON.parse(raw);
+    screenStartTime = d.start || Date.now();
+    if (d.locked && d.lockTime) {
+      if (Date.now() - d.lockTime < SCREEN_LOCK_DURATION) {
+        screenLocked = true; screenLockTime = d.lockTime;
+        setTimeout(() => activateLock(), 50);
+      } else { sessionStorage.removeItem('sg_data'); }
+    }
+  } catch(e) {}
+}
+window.addEventListener('beforeunload', sgSave);
+window.addEventListener('pagehide', sgSave);
 
 function startScreenTimer() {
   if (screenLocked) return;
   clearTimeout(screenAlertTimer);
   screenStartTime = Date.now();
-  screenAlertCount = 0;
-  scheduleScreenAlert(SCREEN_FIRST_ALERT);
+  sgSave();
+  scheduleScreenLock(SCREEN_USE_LIMIT);
 }
 
-function scheduleScreenAlert(delay) {
+function scheduleScreenLock(delay) {
   if (screenLocked) return;
   clearTimeout(screenAlertTimer);
-  screenAlertTimer = setTimeout(() => {
-    showScreenAlert();
-  }, delay);
-}
-
-function showScreenAlert() {
-  screenAlertCount++;
-  const totalMin = Math.round((Date.now() - screenStartTime) / 60000);
-  const overlay = document.getElementById('screenAlertOverlay');
-  const msg = document.getElementById('screenAlertMsg');
-  const sub = document.getElementById('screenAlertSub');
-  const warn = document.getElementById('screenAlertWarn');
-
-  const remaining = SCREEN_MAX_WARNS - screenAlertCount;
-
-  if (screenAlertCount === 1) {
-    msg.innerHTML = '연성아 너무 오래 보고 있다..<br>여기까지만 봐';
-    warn.textContent = `⚠️ 경고 ${screenAlertCount}/${SCREEN_MAX_WARNS} — ${remaining}번 더 무시하면 잠금됩니다`;
-  } else if (screenAlertCount === 2) {
-    msg.innerHTML = '연성아~ 아직도 보고 있네?<br>이제 진짜 그만 봐!';
-    warn.textContent = `⚠️ 경고 ${screenAlertCount}/${SCREEN_MAX_WARNS} — ${remaining}번 더 무시하면 잠금됩니다`;
-  } else {
-    msg.innerHTML = '연성아!! 마지막 경고야!! 😤<br>OK 누르면 잠금된다!';
-    warn.textContent = '🔒 마지막 기회! OK 누르면 잠금됩니다';
-    warn.style.fontWeight = '700';
-  }
-  sub.textContent = `${totalMin}분째 보고 있어요`;
-  overlay.classList.add('show');
-}
-
-function dismissScreenAlert() {
-  document.getElementById('screenAlertOverlay').classList.remove('show');
-
-  if (screenAlertCount >= SCREEN_MAX_WARNS) {
-    // 3번 경고 모두 소진 → 잠금!
-    activateLock();
-  } else {
-    // 아직 기회 남음 → 1분 후 다시 경고
-    scheduleScreenAlert(SCREEN_REPEAT_ALERT);
-  }
+  screenAlertTimer = setTimeout(() => activateLock(), delay);
 }
 
 function activateLock() {
   screenLocked = true;
+  screenLockTime = screenLockTime || Date.now();
   clearTimeout(screenAlertTimer);
-  const totalMin = Math.round((Date.now() - screenStartTime) / 60000);
-  document.getElementById('screenLockSub').textContent = `총 ${totalMin}분 사용 · 아빠한테 말해서 풀어달라고 해`;
+  sgSave();
   document.getElementById('screenLockInput').value = '';
   document.getElementById('screenLockError').textContent = '';
   document.getElementById('screenLockOverlay').classList.add('show');
+  updateLockCountdown();
+  screenLockCountdown = setInterval(updateLockCountdown, 1000);
+  // 바로 프랑스어 퀴즈 시작
+  setTimeout(() => startFrenchQuiz(), 300);
+}
+
+function updateLockCountdown() {
+  const elapsed = Date.now() - screenLockTime;
+  const remaining = SCREEN_LOCK_DURATION - elapsed;
+  if (remaining <= 0) {
+    // 1시간 지남 → 자동 해제
+    doUnlock();
+    return;
+  }
+  const min = Math.floor(remaining / 60000);
+  const sec = Math.floor((remaining % 60000) / 1000);
+  document.getElementById('screenLockSub').innerHTML =
+    `아빠한테 말해서 풀어달라고 해<br>⏱️ 자동 해제까지 <b>${min}분 ${sec < 10 ? '0' : ''}${sec}초</b>`;
+}
+
+function doUnlock() {
+  screenLocked = false;
+  screenLockTime = null;
+  clearInterval(screenLockCountdown);
+  screenLockCountdown = null;
+  document.getElementById('screenLockOverlay').classList.remove('show');
+  document.getElementById('screenLockInput').value = '';
+  document.getElementById('screenLockError').textContent = '';
+  sgSave();
+  startScreenTimer();
 }
 
 function unlockScreen() {
   const input = document.getElementById('screenLockInput');
   const error = document.getElementById('screenLockError');
   if (input.value === SCREEN_LOCK_PIN) {
-    // 해제 성공
-    screenLocked = false;
-    document.getElementById('screenLockOverlay').classList.remove('show');
-    input.value = '';
-    error.textContent = '';
-    // 타이머 완전 리셋
-    startScreenTimer();
+    doUnlock();
   } else {
     error.textContent = '비밀번호가 틀렸어요!';
     input.value = '';
     input.focus();
-    // 틀리면 잠깐 흔들기
     const box = input.closest('.screen-lock-box');
     box.style.animation = 'none';
     box.offsetHeight;
@@ -1567,32 +1771,459 @@ function unlockScreen() {
   }
 }
 
-// 탭 숨김/표시 감지
+// 화면 꺼짐/켜짐 감지 — 잠금 중에도 카운트다운 유지
 document.addEventListener('visibilitychange', () => {
-  if (screenLocked) return;
+  if (screenLocked) {
+    // 잠금 중 돌아왔을 때 카운트다운 체크
+    if (!document.hidden) updateLockCountdown();
+    return;
+  }
   if (document.hidden) {
-    screenHiddenTime = Date.now();
     clearTimeout(screenAlertTimer);
   } else {
-    if (screenHiddenTime) {
-      const away = Date.now() - screenHiddenTime;
-      if (away >= SCREEN_IDLE_RESET) {
-        startScreenTimer();
+    sgLoad(); // 다른 페이지에서 변경된 상태 로드
+    if (!screenLocked) {
+      const elapsed = Date.now() - screenStartTime;
+      if (elapsed < SCREEN_USE_LIMIT) {
+        scheduleScreenLock(SCREEN_USE_LIMIT - elapsed);
       } else {
-        const elapsed = Date.now() - screenStartTime;
-        if (screenAlertCount === 0 && elapsed < SCREEN_FIRST_ALERT) {
-          scheduleScreenAlert(SCREEN_FIRST_ALERT - elapsed);
-        } else if (screenAlertCount > 0) {
-          scheduleScreenAlert(SCREEN_REPEAT_ALERT);
-        }
+        activateLock();
       }
-      screenHiddenTime = null;
     }
   }
 });
 
-// 시작
-startScreenTimer();
+// 시작 — 다른 페이지의 타이머 상태 로드 후 시작
+sgLoad();
+if (!screenLocked) startScreenTimer();
+
+// ===== SETTINGS (password protected) =====
+function openSettings() {
+  document.getElementById('settingsPinStep').style.display = '';
+  document.getElementById('settingsMenuStep').style.display = 'none';
+  document.getElementById('settingsPinInput').value = '';
+  document.getElementById('settingsPinError').textContent = '';
+  document.getElementById('settingsTitle').textContent = '설정';
+  document.getElementById('settingsOverlay').classList.add('show');
+  setTimeout(() => document.getElementById('settingsPinInput').focus(), 300);
+}
+
+function closeSettings(e) {
+  if (e && e.target !== e.currentTarget) return;
+  document.getElementById('settingsOverlay').classList.remove('show');
+}
+
+function checkSettingsPin() {
+  const input = document.getElementById('settingsPinInput');
+  if (input.value === SCREEN_LOCK_PIN) {
+    document.getElementById('settingsPinStep').style.display = 'none';
+    document.getElementById('settingsMenuStep').style.display = '';
+    document.getElementById('settingsTitle').textContent = '⚙️ 관리자 설정';
+    // 슬라이더 초기값 세팅
+    const curMin = getScreenLimitMinutes();
+    document.getElementById('screenLimitSlider').value = curMin;
+    document.getElementById('screenLimitVal').textContent = curMin + '분';
+  } else {
+    document.getElementById('settingsPinError').textContent = '비밀번호가 틀렸어요!';
+    input.value = '';
+    input.focus();
+  }
+}
+
+function openWifiSettings() {
+  // Android intent로 WiFi 설정 열기
+  const intents = [
+    'intent:#Intent;action=android.settings.WIFI_SETTINGS;end',
+    'intent://settings/wifi#Intent;scheme=android-settings;end'
+  ];
+  let opened = false;
+  for (const url of intents) {
+    try { window.location.href = url; opened = true; break; } catch(e) {}
+  }
+  if (!opened) {
+    // fallback: 안내 메시지
+    alert('WiFi 설정을 자동으로 열 수 없습니다.\n\nScreen Pinning을 해제하고\n설정 → WiFi 에서 변경해주세요.');
+  }
+  closeSettings();
+}
+
+function resetScreenTimer() {
+  if (screenLocked) doUnlock();
+  else startScreenTimer();
+  closeSettings();
+}
+
+function applyScreenLimit() {
+  const val = parseInt(document.getElementById('screenLimitSlider').value) || SCREEN_DEFAULT_MINUTES;
+  saveScreenLimit(val);
+  SCREEN_USE_LIMIT = val * 60 * 1000;
+  // 타이머 재시작 (잠금 상태면 해제 후)
+  if (screenLocked) doUnlock();
+  else startScreenTimer();
+  closeSettings();
+}
+
+// ===== FRENCH VOCABULARY QUIZ (300+ essential words) =====
+const FRENCH_VOCAB = [
+  // ── Verbs (essential, intermediate) ──
+  {fr:'avoir',en:'to have',ko:'가지다',cat:'verb'},{fr:'être',en:'to be',ko:'~이다',cat:'verb'},
+  {fr:'faire',en:'to do / to make',ko:'하다/만들다',cat:'verb'},{fr:'aller',en:'to go',ko:'가다',cat:'verb'},
+  {fr:'venir',en:'to come',ko:'오다',cat:'verb'},{fr:'voir',en:'to see',ko:'보다',cat:'verb'},
+  {fr:'savoir',en:'to know (fact)',ko:'알다(사실)',cat:'verb'},{fr:'connaître',en:'to know (person/place)',ko:'알다(사람/장소)',cat:'verb'},
+  {fr:'pouvoir',en:'to be able to',ko:'할 수 있다',cat:'verb'},{fr:'vouloir',en:'to want',ko:'원하다',cat:'verb'},
+  {fr:'devoir',en:'to must / to owe',ko:'~해야 하다',cat:'verb'},{fr:'dire',en:'to say / to tell',ko:'말하다',cat:'verb'},
+  {fr:'prendre',en:'to take',ko:'가져가다',cat:'verb'},{fr:'donner',en:'to give',ko:'주다',cat:'verb'},
+  {fr:'parler',en:'to speak',ko:'말하다',cat:'verb'},{fr:'penser',en:'to think',ko:'생각하다',cat:'verb'},
+  {fr:'croire',en:'to believe',ko:'믿다',cat:'verb'},{fr:'trouver',en:'to find',ko:'찾다',cat:'verb'},
+  {fr:'chercher',en:'to look for',ko:'찾다/구하다',cat:'verb'},{fr:'mettre',en:'to put / to wear',ko:'놓다/입다',cat:'verb'},
+  {fr:'comprendre',en:'to understand',ko:'이해하다',cat:'verb'},{fr:'apprendre',en:'to learn',ko:'배우다',cat:'verb'},
+  {fr:'attendre',en:'to wait',ko:'기다리다',cat:'verb'},{fr:'entendre',en:'to hear',ko:'듣다',cat:'verb'},
+  {fr:'répondre',en:'to answer',ko:'대답하다',cat:'verb'},{fr:'demander',en:'to ask',ko:'묻다',cat:'verb'},
+  {fr:'commencer',en:'to begin',ko:'시작하다',cat:'verb'},{fr:'finir',en:'to finish',ko:'끝내다',cat:'verb'},
+  {fr:'ouvrir',en:'to open',ko:'열다',cat:'verb'},{fr:'fermer',en:'to close',ko:'닫다',cat:'verb'},
+  {fr:'acheter',en:'to buy',ko:'사다',cat:'verb'},{fr:'vendre',en:'to sell',ko:'팔다',cat:'verb'},
+  {fr:'envoyer',en:'to send',ko:'보내다',cat:'verb'},{fr:'recevoir',en:'to receive',ko:'받다',cat:'verb'},
+  {fr:'laisser',en:'to leave / to let',ko:'놔두다/허락하다',cat:'verb'},{fr:'tomber',en:'to fall',ko:'떨어지다',cat:'verb'},
+  {fr:'monter',en:'to go up / to climb',ko:'올라가다',cat:'verb'},{fr:'descendre',en:'to go down',ko:'내려가다',cat:'verb'},
+  {fr:'marcher',en:'to walk',ko:'걷다',cat:'verb'},{fr:'courir',en:'to run',ko:'달리다',cat:'verb'},
+  {fr:'conduire',en:'to drive',ko:'운전하다',cat:'verb'},{fr:'voyager',en:'to travel',ko:'여행하다',cat:'verb'},
+  {fr:'essayer',en:'to try',ko:'시도하다',cat:'verb'},{fr:'utiliser',en:'to use',ko:'사용하다',cat:'verb'},
+  {fr:'choisir',en:'to choose',ko:'선택하다',cat:'verb'},{fr:'oublier',en:'to forget',ko:'잊다',cat:'verb'},
+  {fr:'se souvenir',en:'to remember',ko:'기억하다',cat:'verb'},{fr:'aider',en:'to help',ko:'돕다',cat:'verb'},
+  {fr:'expliquer',en:'to explain',ko:'설명하다',cat:'verb'},{fr:'raconter',en:'to tell (story)',ko:'이야기하다',cat:'verb'},
+  {fr:'montrer',en:'to show',ko:'보여주다',cat:'verb'},{fr:'sembler',en:'to seem',ko:'~처럼 보이다',cat:'verb'},
+  {fr:'rester',en:'to stay',ko:'머물다',cat:'verb'},{fr:'partir',en:'to leave / depart',ko:'떠나다',cat:'verb'},
+  {fr:'sortir',en:'to go out',ko:'나가다',cat:'verb'},{fr:'entrer',en:'to enter',ko:'들어가다',cat:'verb'},
+  {fr:'arriver',en:'to arrive',ko:'도착하다',cat:'verb'},{fr:'rentrer',en:'to return home',ko:'귀가하다',cat:'verb'},
+  {fr:'manger',en:'to eat',ko:'먹다',cat:'verb'},{fr:'boire',en:'to drink',ko:'마시다',cat:'verb'},
+  {fr:'dormir',en:'to sleep',ko:'자다',cat:'verb'},{fr:'se réveiller',en:'to wake up',ko:'일어나다',cat:'verb'},
+  {fr:'se lever',en:'to get up',ko:'일어서다',cat:'verb'},{fr:'se coucher',en:'to go to bed',ko:'잠자리에 들다',cat:'verb'},
+  {fr:'lire',en:'to read',ko:'읽다',cat:'verb'},{fr:'écrire',en:'to write',ko:'쓰다',cat:'verb'},
+  {fr:'jouer',en:'to play',ko:'놀다',cat:'verb'},{fr:'travailler',en:'to work',ko:'일하다',cat:'verb'},
+  {fr:'étudier',en:'to study',ko:'공부하다',cat:'verb'},{fr:'porter',en:'to carry / to wear',ko:'나르다/입다',cat:'verb'},
+  {fr:'changer',en:'to change',ko:'바꾸다',cat:'verb'},{fr:'perdre',en:'to lose',ko:'잃다',cat:'verb'},
+  {fr:'gagner',en:'to win / to earn',ko:'이기다/벌다',cat:'verb'},{fr:'payer',en:'to pay',ko:'지불하다',cat:'verb'},
+  {fr:'sentir',en:'to feel / to smell',ko:'느끼다/냄새맡다',cat:'verb'},{fr:'tenir',en:'to hold',ko:'잡다',cat:'verb'},
+  {fr:'suivre',en:'to follow',ko:'따라가다',cat:'verb'},{fr:'vivre',en:'to live',ko:'살다',cat:'verb'},
+  // ── Adjectives ──
+  {fr:'grand',en:'big / tall',ko:'큰/키큰',cat:'adj'},{fr:'petit',en:'small / short',ko:'작은/키작은',cat:'adj'},
+  {fr:'bon',en:'good',ko:'좋은',cat:'adj'},{fr:'mauvais',en:'bad',ko:'나쁜',cat:'adj'},
+  {fr:'beau / belle',en:'beautiful',ko:'아름다운',cat:'adj'},{fr:'laid',en:'ugly',ko:'못생긴',cat:'adj'},
+  {fr:'jeune',en:'young',ko:'젊은',cat:'adj'},{fr:'vieux / vieille',en:'old',ko:'늙은/오래된',cat:'adj'},
+  {fr:'nouveau / nouvelle',en:'new',ko:'새로운',cat:'adj'},{fr:'ancien',en:'old / former',ko:'오래된/이전의',cat:'adj'},
+  {fr:'long / longue',en:'long',ko:'긴',cat:'adj'},{fr:'court',en:'short (length)',ko:'짧은',cat:'adj'},
+  {fr:'haut',en:'high / tall',ko:'높은',cat:'adj'},{fr:'bas',en:'low',ko:'낮은',cat:'adj'},
+  {fr:'gros / grosse',en:'fat / big',ko:'뚱뚱한/큰',cat:'adj'},{fr:'mince',en:'thin / slim',ko:'날씬한',cat:'adj'},
+  {fr:'fort',en:'strong',ko:'강한',cat:'adj'},{fr:'faible',en:'weak',ko:'약한',cat:'adj'},
+  {fr:'rapide',en:'fast',ko:'빠른',cat:'adj'},{fr:'lent',en:'slow',ko:'느린',cat:'adj'},
+  {fr:'facile',en:'easy',ko:'쉬운',cat:'adj'},{fr:'difficile',en:'difficult',ko:'어려운',cat:'adj'},
+  {fr:'possible',en:'possible',ko:'가능한',cat:'adj'},{fr:'impossible',en:'impossible',ko:'불가능한',cat:'adj'},
+  {fr:'important',en:'important',ko:'중요한',cat:'adj'},{fr:'nécessaire',en:'necessary',ko:'필요한',cat:'adj'},
+  {fr:'différent',en:'different',ko:'다른',cat:'adj'},{fr:'même',en:'same',ko:'같은',cat:'adj'},
+  {fr:'seul',en:'alone / only',ko:'혼자/유일한',cat:'adj'},{fr:'ensemble',en:'together',ko:'함께',cat:'adj'},
+  {fr:'chaud',en:'hot / warm',ko:'뜨거운/따뜻한',cat:'adj'},{fr:'froid',en:'cold',ko:'차가운',cat:'adj'},
+  {fr:'propre',en:'clean / own',ko:'깨끗한/자신의',cat:'adj'},{fr:'sale',en:'dirty',ko:'더러운',cat:'adj'},
+  {fr:'plein',en:'full',ko:'가득찬',cat:'adj'},{fr:'vide',en:'empty',ko:'빈',cat:'adj'},
+  {fr:'ouvert',en:'open',ko:'열린',cat:'adj'},{fr:'fermé',en:'closed',ko:'닫힌',cat:'adj'},
+  {fr:'heureux / heureuse',en:'happy',ko:'행복한',cat:'adj'},{fr:'triste',en:'sad',ko:'슬픈',cat:'adj'},
+  {fr:'content',en:'pleased / glad',ko:'기쁜',cat:'adj'},{fr:'fâché',en:'angry',ko:'화난',cat:'adj'},
+  {fr:'fatigué',en:'tired',ko:'피곤한',cat:'adj'},{fr:'malade',en:'sick',ko:'아픈',cat:'adj'},
+  {fr:'prêt',en:'ready',ko:'준비된',cat:'adj'},{fr:'sûr',en:'sure / safe',ko:'확실한/안전한',cat:'adj'},
+  {fr:'libre',en:'free',ko:'자유로운',cat:'adj'},{fr:'occupé',en:'busy',ko:'바쁜',cat:'adj'},
+  {fr:'gentil / gentille',en:'kind / nice',ko:'친절한',cat:'adj'},{fr:'méchant',en:'mean / naughty',ko:'못된/나쁜',cat:'adj'},
+  {fr:'intéressant',en:'interesting',ko:'흥미로운',cat:'adj'},{fr:'ennuyeux',en:'boring',ko:'지루한',cat:'adj'},
+  {fr:'dangereux',en:'dangerous',ko:'위험한',cat:'adj'},{fr:'tranquille',en:'calm / quiet',ko:'조용한',cat:'adj'},
+  {fr:'dernier / dernière',en:'last',ko:'마지막의',cat:'adj'},{fr:'prochain',en:'next',ko:'다음의',cat:'adj'},
+  {fr:'premier / première',en:'first',ko:'첫번째',cat:'adj'},{fr:'cher / chère',en:'expensive / dear',ko:'비싼/소중한',cat:'adj'},
+  // ── Adverbs & Connectors ──
+  {fr:'très',en:'very',ko:'매우',cat:'adverb'},{fr:'trop',en:'too much',ko:'너무',cat:'adverb'},
+  {fr:'assez',en:'enough / quite',ko:'충분히/꽤',cat:'adverb'},{fr:'peu',en:'little / few',ko:'적게/조금',cat:'adverb'},
+  {fr:'beaucoup',en:'a lot / many',ko:'많이',cat:'adverb'},{fr:'plus',en:'more',ko:'더',cat:'adverb'},
+  {fr:'moins',en:'less',ko:'덜',cat:'adverb'},{fr:'bien',en:'well',ko:'잘',cat:'adverb'},
+  {fr:'mal',en:'badly',ko:'나쁘게',cat:'adverb'},{fr:'vite',en:'quickly',ko:'빨리',cat:'adverb'},
+  {fr:'souvent',en:'often',ko:'자주',cat:'adverb'},{fr:'toujours',en:'always',ko:'항상',cat:'adverb'},
+  {fr:'jamais',en:'never',ko:'절대~않다',cat:'adverb'},{fr:'parfois',en:'sometimes',ko:'가끔',cat:'adverb'},
+  {fr:'déjà',en:'already',ko:'이미',cat:'adverb'},{fr:'encore',en:'still / again',ko:'아직/다시',cat:'adverb'},
+  {fr:'maintenant',en:'now',ko:'지금',cat:'adverb'},{fr:'bientôt',en:'soon',ko:'곧',cat:'adverb'},
+  {fr:'ici',en:'here',ko:'여기',cat:'adverb'},{fr:'là-bas',en:'over there',ko:'저기',cat:'adverb'},
+  {fr:'partout',en:'everywhere',ko:'어디나',cat:'adverb'},{fr:'ensemble',en:'together',ko:'함께',cat:'adverb'},
+  {fr:'surtout',en:'especially',ko:'특히',cat:'adverb'},{fr:'environ',en:'about / approximately',ko:'약/대략',cat:'adverb'},
+  {fr:'peut-être',en:'maybe / perhaps',ko:'아마도',cat:'adverb'},{fr:'vraiment',en:'really / truly',ko:'정말로',cat:'adverb'},
+  {fr:'seulement',en:'only',ko:'오직/단지',cat:'adverb'},{fr:'plutôt',en:'rather',ko:'오히려/차라리',cat:'adverb'},
+  // ── Prepositions & Small Words ──
+  {fr:'dans',en:'in / inside',ko:'안에',cat:'preposition'},{fr:'sur',en:'on / upon',ko:'위에',cat:'preposition'},
+  {fr:'sous',en:'under',ko:'아래에',cat:'preposition'},{fr:'devant',en:'in front of',ko:'앞에',cat:'preposition'},
+  {fr:'derrière',en:'behind',ko:'뒤에',cat:'preposition'},{fr:'entre',en:'between',ko:'사이에',cat:'preposition'},
+  {fr:'avec',en:'with',ko:'~와 함께',cat:'preposition'},{fr:'sans',en:'without',ko:'~없이',cat:'preposition'},
+  {fr:'pour',en:'for',ko:'~를 위해',cat:'preposition'},{fr:'contre',en:'against',ko:'~에 반대하여',cat:'preposition'},
+  {fr:'vers',en:'towards',ko:'~쪽으로',cat:'preposition'},{fr:'chez',en:'at (someone\'s place)',ko:'~의 집에서',cat:'preposition'},
+  {fr:'pendant',en:'during',ko:'~동안',cat:'preposition'},{fr:'depuis',en:'since / for (time)',ko:'~이후/~동안',cat:'preposition'},
+  {fr:'avant',en:'before',ko:'~전에',cat:'preposition'},{fr:'après',en:'after',ko:'~후에',cat:'preposition'},
+  {fr:'à côté de',en:'next to',ko:'옆에',cat:'preposition'},{fr:'loin de',en:'far from',ko:'~에서 멀리',cat:'preposition'},
+  {fr:'près de',en:'near / close to',ko:'가까이',cat:'preposition'},{fr:'au-dessus de',en:'above',ko:'위쪽에',cat:'preposition'},
+  // ── Everyday Life & Society ──
+  {fr:'la ville',en:'city / town',ko:'도시',cat:'society'},{fr:'le pays',en:'country',ko:'나라',cat:'society'},
+  {fr:'la rue',en:'street',ko:'거리',cat:'society'},{fr:'le magasin',en:'shop / store',ko:'가게',cat:'society'},
+  {fr:'le restaurant',en:'restaurant',ko:'식당',cat:'society'},{fr:'la gare',en:'train station',ko:'기차역',cat:'society'},
+  {fr:"l'aéroport",en:'airport',ko:'공항',cat:'society'},{fr:"l'hôpital",en:'hospital',ko:'병원',cat:'society'},
+  {fr:'la banque',en:'bank',ko:'은행',cat:'society'},{fr:'la poste',en:'post office',ko:'우체국',cat:'society'},
+  {fr:'le musée',en:'museum',ko:'박물관',cat:'society'},{fr:'le cinéma',en:'cinema',ko:'영화관',cat:'society'},
+  {fr:'la bibliothèque',en:'library',ko:'도서관',cat:'society'},{fr:'le marché',en:'market',ko:'시장',cat:'society'},
+  {fr:'la pharmacie',en:'pharmacy',ko:'약국',cat:'society'},{fr:'le parc',en:'park',ko:'공원',cat:'society'},
+  {fr:'le travail',en:'work / job',ko:'일/직업',cat:'society'},{fr:'le bureau',en:'office / desk',ko:'사무실/책상',cat:'society'},
+  {fr:"l'argent",en:'money',ko:'돈',cat:'society'},{fr:'le prix',en:'price',ko:'가격',cat:'society'},
+  {fr:'la voiture',en:'car',ko:'자동차',cat:'society'},{fr:'le bus',en:'bus',ko:'버스',cat:'society'},
+  {fr:'le train',en:'train',ko:'기차',cat:'society'},{fr:'le vélo',en:'bicycle',ko:'자전거',cat:'society'},
+  {fr:"l'avion",en:'airplane',ko:'비행기',cat:'society'},{fr:'le bateau',en:'boat / ship',ko:'배',cat:'society'},
+  // ── Emotions & States ──
+  {fr:'la joie',en:'joy',ko:'기쁨',cat:'emotion'},{fr:'la peur',en:'fear',ko:'두려움',cat:'emotion'},
+  {fr:'la colère',en:'anger',ko:'분노',cat:'emotion'},{fr:'la surprise',en:'surprise',ko:'놀람',cat:'emotion'},
+  {fr:"l'amour",en:'love',ko:'사랑',cat:'emotion'},{fr:'la tristesse',en:'sadness',ko:'슬픔',cat:'emotion'},
+  {fr:"l'espoir",en:'hope',ko:'희망',cat:'emotion'},{fr:'la confiance',en:'trust / confidence',ko:'신뢰/자신감',cat:'emotion'},
+  {fr:"l'inquiétude",en:'worry / anxiety',ko:'걱정/불안',cat:'emotion'},{fr:'la fierté',en:'pride',ko:'자부심',cat:'emotion'},
+  {fr:'le bonheur',en:'happiness',ko:'행복',cat:'emotion'},{fr:'le courage',en:'courage',ko:'용기',cat:'emotion'},
+  // ── Time & Calendar ──
+  {fr:'le matin',en:'morning',ko:'아침',cat:'time'},{fr:"l'après-midi",en:'afternoon',ko:'오후',cat:'time'},
+  {fr:'le soir',en:'evening',ko:'저녁',cat:'time'},{fr:'la nuit',en:'night',ko:'밤',cat:'time'},
+  {fr:'la semaine',en:'week',ko:'주',cat:'time'},{fr:'le mois',en:'month',ko:'달/월',cat:'time'},
+  {fr:"l'année",en:'year',ko:'년',cat:'time'},{fr:'la saison',en:'season',ko:'계절',cat:'time'},
+  {fr:'le printemps',en:'spring',ko:'봄',cat:'time'},{fr:"l'été",en:'summer',ko:'여름',cat:'time'},
+  {fr:"l'automne",en:'autumn / fall',ko:'가을',cat:'time'},{fr:"l'hiver",en:'winter',ko:'겨울',cat:'time'},
+  {fr:"aujourd'hui",en:'today',ko:'오늘',cat:'time'},{fr:'demain',en:'tomorrow',ko:'내일',cat:'time'},
+  {fr:'hier',en:'yesterday',ko:'어제',cat:'time'},{fr:'tôt',en:'early',ko:'일찍',cat:'time'},
+  {fr:'tard',en:'late',ko:'늦게',cat:'time'},{fr:'une heure',en:'one hour / one o\'clock',ko:'1시간/1시',cat:'time'},
+  {fr:'une minute',en:'one minute',ko:'1분',cat:'time'},{fr:'une seconde',en:'one second',ko:'1초',cat:'time'},
+  // ── School & Education ──
+  {fr:"l'école",en:'school',ko:'학교',cat:'school'},{fr:'le collège',en:'middle school',ko:'중학교',cat:'school'},
+  {fr:'le lycée',en:'high school',ko:'고등학교',cat:'school'},{fr:"l'université",en:'university',ko:'대학교',cat:'school'},
+  {fr:'le cours',en:'class / lesson',ko:'수업',cat:'school'},{fr:"l'examen",en:'exam',ko:'시험',cat:'school'},
+  {fr:'la note',en:'grade / mark',ko:'성적',cat:'school'},{fr:'les devoirs',en:'homework',ko:'숙제',cat:'school'},
+  {fr:'le professeur',en:'teacher',ko:'선생님',cat:'school'},{fr:"l'élève",en:'student',ko:'학생',cat:'school'},
+  {fr:'les mathématiques',en:'mathematics',ko:'수학',cat:'school'},{fr:'les sciences',en:'science',ko:'과학',cat:'school'},
+  {fr:"l'histoire",en:'history',ko:'역사',cat:'school'},{fr:'la géographie',en:'geography',ko:'지리',cat:'school'},
+  {fr:'le français',en:'French (subject)',ko:'프랑스어',cat:'school'},{fr:"l'anglais",en:'English (subject)',ko:'영어',cat:'school'},
+  {fr:'la musique',en:'music',ko:'음악',cat:'school'},{fr:'le sport',en:'sport / P.E.',ko:'체육',cat:'school'},
+  {fr:'le dessin',en:'drawing / art',ko:'미술',cat:'school'},{fr:'la récréation',en:'break / recess',ko:'쉬는시간',cat:'school'},
+  // ── Food & Cooking ──
+  {fr:'le repas',en:'meal',ko:'식사',cat:'food'},{fr:'le petit-déjeuner',en:'breakfast',ko:'아침식사',cat:'food'},
+  {fr:'le déjeuner',en:'lunch',ko:'점심',cat:'food'},{fr:'le dîner',en:'dinner',ko:'저녁식사',cat:'food'},
+  {fr:'la viande',en:'meat',ko:'고기',cat:'food'},{fr:'le poisson',en:'fish',ko:'생선',cat:'food'},
+  {fr:'les légumes',en:'vegetables',ko:'채소',cat:'food'},{fr:'les fruits',en:'fruits',ko:'과일',cat:'food'},
+  {fr:'le pain',en:'bread',ko:'빵',cat:'food'},{fr:'le fromage',en:'cheese',ko:'치즈',cat:'food'},
+  {fr:"l'eau",en:'water',ko:'물',cat:'food'},{fr:'le jus',en:'juice',ko:'주스',cat:'food'},
+  {fr:'le sel',en:'salt',ko:'소금',cat:'food'},{fr:'le sucre',en:'sugar',ko:'설탕',cat:'food'},
+  {fr:"l'huile",en:'oil',ko:'기름',cat:'food'},{fr:'la recette',en:'recipe',ko:'레시피',cat:'food'},
+  {fr:'la cuisine',en:'cooking / kitchen',ko:'요리/주방',cat:'food'},{fr:'le plat',en:'dish / course',ko:'요리/접시',cat:'food'},
+  {fr:"l'assiette",en:'plate',ko:'접시',cat:'food'},{fr:'le verre',en:'glass',ko:'유리잔',cat:'food'},
+  // ── Useful Phrases & Expressions ──
+  {fr:'bien sûr',en:'of course',ko:'물론',cat:'phrase'},{fr:"d'accord",en:'okay / agreed',ko:'알겠어/동의',cat:'phrase'},
+  {fr:'pas du tout',en:'not at all',ko:'전혀 아닌',cat:'phrase'},{fr:'à bientôt',en:'see you soon',ko:'곧 만나',cat:'phrase'},
+  {fr:'comment ça va ?',en:'how are you?',ko:'어떻게 지내?',cat:'phrase'},{fr:'ça va bien',en:'I\'m fine',ko:'잘 지내',cat:'phrase'},
+  {fr:'je ne sais pas',en:'I don\'t know',ko:'모르겠어',cat:'phrase'},{fr:"j'ai besoin de",en:'I need',ko:'~이 필요해',cat:'phrase'},
+  {fr:"je voudrais",en:'I would like',ko:'~하고 싶어요',cat:'phrase'},{fr:"il y a",en:'there is / there are',ko:'~이 있다',cat:'phrase'},
+  {fr:"qu'est-ce que c'est ?",en:'what is it?',ko:'이것은 뭐야?',cat:'phrase'},{fr:'combien ?',en:'how much / how many?',ko:'얼마/몇개?',cat:'phrase'},
+  {fr:'pourquoi ?',en:'why?',ko:'왜?',cat:'phrase'},{fr:'comment ?',en:'how?',ko:'어떻게?',cat:'phrase'},
+  {fr:'quand ?',en:'when?',ko:'언제?',cat:'phrase'},{fr:'où ?',en:'where?',ko:'어디?',cat:'phrase'},
+  {fr:'qui ?',en:'who?',ko:'누구?',cat:'phrase'},{fr:'parce que',en:'because',ko:'왜냐하면',cat:'phrase'},
+  {fr:'en fait',en:'actually / in fact',ko:'사실은',cat:'phrase'},{fr:'par exemple',en:'for example',ko:'예를 들어',cat:'phrase'},
+  {fr:"c'est-à-dire",en:'that is to say',ko:'즉/다시 말해서',cat:'phrase'},{fr:"tout à fait",en:'absolutely / exactly',ko:'완전히/정확히',cat:'phrase'},
+  {fr:'de rien',en:'you\'re welcome',ko:'천만에요',cat:'phrase'},{fr:'enchanté',en:'nice to meet you',ko:'만나서 반갑습니다',cat:'phrase'},
+  // ── Nature & Weather ──
+  {fr:'le soleil',en:'sun',ko:'태양',cat:'nature'},{fr:'la pluie',en:'rain',ko:'비',cat:'nature'},
+  {fr:'la neige',en:'snow',ko:'눈(날씨)',cat:'nature'},{fr:'le vent',en:'wind',ko:'바람',cat:'nature'},
+  {fr:'le nuage',en:'cloud',ko:'구름',cat:'nature'},{fr:"l'orage",en:'storm',ko:'폭풍',cat:'nature'},
+  {fr:'le brouillard',en:'fog',ko:'안개',cat:'nature'},{fr:'la température',en:'temperature',ko:'온도',cat:'nature'},
+  {fr:'la mer',en:'sea',ko:'바다',cat:'nature'},{fr:'la rivière',en:'river',ko:'강',cat:'nature'},
+  {fr:'le lac',en:'lake',ko:'호수',cat:'nature'},{fr:'la forêt',en:'forest',ko:'숲',cat:'nature'},
+  {fr:'la montagne',en:'mountain',ko:'산',cat:'nature'},{fr:'le ciel',en:'sky',ko:'하늘',cat:'nature'},
+  {fr:"l'étoile",en:'star',ko:'별',cat:'nature'},{fr:'la lune',en:'moon',ko:'달',cat:'nature'},
+  {fr:"l'arbre",en:'tree',ko:'나무',cat:'nature'},{fr:'la fleur',en:'flower',ko:'꽃',cat:'nature'},
+  {fr:"l'herbe",en:'grass',ko:'풀/잔디',cat:'nature'},{fr:'la terre',en:'earth / ground',ko:'지구/땅',cat:'nature'},
+  // ── House & Home ──
+  {fr:'la maison',en:'house',ko:'집',cat:'house'},{fr:"l'appartement",en:'apartment',ko:'아파트',cat:'house'},
+  {fr:'la chambre',en:'bedroom',ko:'침실',cat:'house'},{fr:'la cuisine',en:'kitchen (room)',ko:'주방',cat:'house'},
+  {fr:'la salle de bain',en:'bathroom',ko:'화장실',cat:'house'},{fr:'le salon',en:'living room',ko:'거실',cat:'house'},
+  {fr:'le couloir',en:'hallway',ko:'복도',cat:'house'},{fr:"l'escalier",en:'stairs',ko:'계단',cat:'house'},
+  {fr:'le toit',en:'roof',ko:'지붕',cat:'house'},{fr:'le mur',en:'wall',ko:'벽',cat:'house'},
+  {fr:'le plancher',en:'floor',ko:'바닥',cat:'house'},{fr:'la porte',en:'door',ko:'문',cat:'house'},
+  {fr:'la fenêtre',en:'window',ko:'창문',cat:'house'},{fr:'le jardin',en:'garden',ko:'정원',cat:'house'},
+  {fr:'la clé',en:'key',ko:'열쇠',cat:'house'},{fr:'le lit',en:'bed',ko:'침대',cat:'house'},
+  // ── Body & Health ──
+  {fr:'la tête',en:'head',ko:'머리',cat:'body'},{fr:'les yeux',en:'eyes',ko:'눈',cat:'body'},
+  {fr:'le nez',en:'nose',ko:'코',cat:'body'},{fr:'la bouche',en:'mouth',ko:'입',cat:'body'},
+  {fr:"l'oreille",en:'ear',ko:'귀',cat:'body'},{fr:'le visage',en:'face',ko:'얼굴',cat:'body'},
+  {fr:'le cou',en:'neck',ko:'목',cat:'body'},{fr:"l'épaule",en:'shoulder',ko:'어깨',cat:'body'},
+  {fr:'le bras',en:'arm',ko:'팔',cat:'body'},{fr:'la main',en:'hand',ko:'손',cat:'body'},
+  {fr:'le doigt',en:'finger',ko:'손가락',cat:'body'},{fr:'la jambe',en:'leg',ko:'다리',cat:'body'},
+  {fr:'le genou',en:'knee',ko:'무릎',cat:'body'},{fr:'le pied',en:'foot',ko:'발',cat:'body'},
+  {fr:'le coeur',en:'heart',ko:'심장',cat:'body'},{fr:'le dos',en:'back',ko:'등',cat:'body'},
+  {fr:'le ventre',en:'stomach / belly',ko:'배',cat:'body'},{fr:'la santé',en:'health',ko:'건강',cat:'body'},
+  {fr:'le médecin',en:'doctor',ko:'의사',cat:'body'},{fr:'le médicament',en:'medicine / drug',ko:'약',cat:'body'},
+  // ── Family & People ──
+  {fr:'la mère',en:'mother',ko:'엄마',cat:'family'},{fr:'le père',en:'father',ko:'아빠',cat:'family'},
+  {fr:'le frère',en:'brother',ko:'형제',cat:'family'},{fr:'la soeur',en:'sister',ko:'자매',cat:'family'},
+  {fr:'le fils',en:'son',ko:'아들',cat:'family'},{fr:'la fille',en:'daughter / girl',ko:'딸/소녀',cat:'family'},
+  {fr:'le mari',en:'husband',ko:'남편',cat:'family'},{fr:'la femme',en:'wife / woman',ko:'아내/여성',cat:'family'},
+  {fr:"l'enfant",en:'child',ko:'아이',cat:'family'},{fr:'le bébé',en:'baby',ko:'아기',cat:'family'},
+  {fr:"l'ami / l'amie",en:'friend',ko:'친구',cat:'family'},{fr:'le voisin',en:'neighbour',ko:'이웃',cat:'family'},
+  {fr:'les gens',en:'people',ko:'사람들',cat:'family'},{fr:'un homme',en:'a man',ko:'남자',cat:'family'},
+  {fr:'une femme',en:'a woman',ko:'여자',cat:'family'},{fr:'un garçon',en:'a boy',ko:'소년',cat:'family'},
+];
+
+const CAT_ICONS = {
+  verb:'🏃',adj:'📐',adverb:'⚡',preposition:'📍',society:'🏙️',emotion:'💖',
+  time:'📅',school:'📚',food:'🍽️',phrase:'💬',nature:'🌿',house:'🏠',
+  body:'🫀',family:'👨‍👩‍👧‍👦'
+};
+
+const QUIZ_TOTAL = 10;
+const QUIZ_PASS = 8;
+let quizQuestions = [];
+let quizCurrent = 0;
+let quizCorrect = 0;
+let quizAnswered = false;
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function startFrenchQuiz() {
+  // Pick 10 random words
+  const pool = shuffle(FRENCH_VOCAB);
+  quizQuestions = pool.slice(0, QUIZ_TOTAL).map(word => {
+    // Generate 3 wrong answers (same category preferred)
+    const sameCat = FRENCH_VOCAB.filter(w => w.cat === word.cat && w.en !== word.en);
+    const diffCat = FRENCH_VOCAB.filter(w => w.en !== word.en);
+    let wrongPool = sameCat.length >= 3 ? shuffle(sameCat) : shuffle(diffCat);
+    const wrongs = wrongPool.slice(0, 3).map(w => w.en);
+    const options = shuffle([word.en, ...wrongs]);
+    return { ...word, options, answer: word.en };
+  });
+  quizCurrent = 0;
+  quizCorrect = 0;
+  quizAnswered = false;
+
+  // Show quiz
+  document.getElementById('quizPanel').classList.add('show');
+  document.getElementById('quizResult').style.display = 'none';
+  document.getElementById('quizBody').style.display = '';
+  renderQuizProgress();
+  renderQuizQuestion();
+}
+
+function renderQuizProgress() {
+  let html = '';
+  for (let i = 0; i < QUIZ_TOTAL; i++) {
+    let cls = '';
+    if (i < quizCurrent) cls = quizQuestions[i].wasCorrect ? 'correct' : 'wrong';
+    else if (i === quizCurrent) cls = 'current';
+    html += `<div class="quiz-dot ${cls}"></div>`;
+  }
+  document.getElementById('quizProgress').innerHTML = html;
+}
+
+function renderQuizQuestion() {
+  const q = quizQuestions[quizCurrent];
+  const icon = CAT_ICONS[q.cat] || '📖';
+  document.getElementById('quizNum').textContent = `문제 ${quizCurrent + 1} / ${QUIZ_TOTAL}`;
+  document.getElementById('quizWord').textContent = q.fr;
+  document.getElementById('quizHint').textContent = `${icon} ${q.cat} · 뜻을 골라보세요!`;
+  document.getElementById('quizScoreDisplay').textContent = `✅ ${quizCorrect} / ${quizCurrent}`;
+
+  const optDiv = document.getElementById('quizOptions');
+  optDiv.innerHTML = q.options.map((opt, i) =>
+    `<button class="quiz-option" onclick="selectQuizAnswer(${i})">${opt}</button>`
+  ).join('');
+  quizAnswered = false;
+}
+
+function selectQuizAnswer(idx) {
+  if (quizAnswered) return;
+  quizAnswered = true;
+
+  const q = quizQuestions[quizCurrent];
+  const selected = q.options[idx];
+  const correct = selected === q.answer;
+  if (correct) quizCorrect++;
+  q.wasCorrect = correct;
+
+  // Highlight buttons
+  const btns = document.querySelectorAll('#quizOptions .quiz-option');
+  btns.forEach((btn, i) => {
+    btn.disabled = true;
+    if (q.options[i] === q.answer) btn.classList.add('correct');
+    if (i === idx && !correct) btn.classList.add('wrong');
+  });
+
+  // Update progress
+  renderQuizProgress();
+  document.getElementById('quizScoreDisplay').textContent = `✅ ${quizCorrect} / ${quizCurrent + 1}`;
+
+  // Next question or result after delay
+  setTimeout(() => {
+    quizCurrent++;
+    if (quizCurrent >= QUIZ_TOTAL) {
+      showQuizResult();
+    } else {
+      renderQuizProgress();
+      renderQuizQuestion();
+    }
+  }, 1000);
+}
+
+function showQuizResult() {
+  document.getElementById('quizBody').style.display = 'none';
+  const resultDiv = document.getElementById('quizResult');
+  resultDiv.style.display = '';
+
+  const passed = quizCorrect >= QUIZ_PASS;
+  const pct = Math.round(quizCorrect / QUIZ_TOTAL * 100);
+
+  if (passed) {
+    resultDiv.innerHTML = `
+      <div class="quiz-result-icon">🎉</div>
+      <div class="quiz-result-title pass">합격! PASS!</div>
+      <div class="quiz-result-score">${quizCorrect}/${QUIZ_TOTAL} (${pct}%)</div>
+      <div class="quiz-result-msg">잘했어 연성아! 🇫🇷 Très bien!<br>10분 더 볼 수 있어!</div>
+      <button class="quiz-result-btn unlock" onclick="quizUnlock()">🎮 10분 더 보기!</button>
+    `;
+  } else {
+    resultDiv.innerHTML = `
+      <div class="quiz-result-icon">😢</div>
+      <div class="quiz-result-title fail">아쉽다! Not quite...</div>
+      <div class="quiz-result-score">${quizCorrect}/${QUIZ_TOTAL} (${pct}%) — ${QUIZ_PASS}개 필요!</div>
+      <div class="quiz-result-msg">다시 도전해보자!<br>조금만 더 공부하면 돼!</div>
+      <button class="quiz-result-btn retry" onclick="retryQuiz()">🔄 다시 도전!</button>
+      <button class="quiz-result-btn back" onclick="closeQuiz()">🔒 돌아가기</button>
+    `;
+  }
+}
+
+function quizUnlock() {
+  document.getElementById('quizPanel').classList.remove('show');
+  screenLocked = false;
+  screenLockTime = null;
+  clearInterval(screenLockCountdown);
+  screenLockCountdown = null;
+  document.getElementById('screenLockOverlay').classList.remove('show');
+  screenStartTime = Date.now();
+  clearTimeout(screenAlertTimer);
+  sgSave();
+  scheduleScreenLock(SCREEN_USE_LIMIT);
+}
+
+function retryQuiz() {
+  startFrenchQuiz();
+}
+
+function closeQuiz() {
+  document.getElementById('quizPanel').classList.remove('show');
+}
 
 // ===== SERVICE WORKER =====
 if ('serviceWorker' in navigator) {

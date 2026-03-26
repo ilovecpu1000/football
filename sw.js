@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ys-football-v3';
+const CACHE_NAME = 'ys-football-v8';
 
 // Install event - cache basic shell
 self.addEventListener('install', (event) => {
@@ -7,6 +7,10 @@ self.addEventListener('install', (event) => {
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll([
         './index.html',
+        './chess-yeonseong.html',
+        './tetris-yeonseong.html',
+        './screen-guard.js',
+        './screen-guard.css',
         './manifest.json',
         './icon-192.png',
         './icon-512.png'
