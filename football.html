@@ -462,6 +462,7 @@
     .sg-timer-float .sg-session { font-weight: 700; font-size: 14px; color: #4ade80; font-variant-numeric: tabular-nums; }
     .sg-timer-float .sg-daily { font-size: 11px; color: #999; font-variant-numeric: tabular-nums; }
     .sg-timer-float .sg-sep { width: 1px; height: 16px; background: rgba(255,255,255,0.15); }
+    .sg-timer-float .sg-ver { font-size: 9px; color: #555; margin-left: 2px; }
     .sg-timer-float.warn .sg-session { color: #fbbf24; }
     .sg-timer-float.critical .sg-session { color: #ef4444; animation: pulse 1s infinite; }
     .sg-timer-float.critical { border-color: rgba(239,68,68,0.4); }
@@ -727,6 +728,7 @@
     <span class="sg-session" id="sgSessionTime">--:--</span>
     <span class="sg-sep"></span>
     <span class="sg-daily" id="sgDailyTime">오늘 --분 남음</span>
+    <span class="sg-ver">v13</span>
   </div>
 
   <!-- Screen Lock -->
@@ -1137,8 +1139,21 @@ function getVenueTime(dateStr, leagueId) {
 // ===== FETCH =====
 async function fetchESPN(league, dateStr) {
   try {
-    const r = await fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/${league}/scoreboard?dates=${dateStr}`);
-    return r.ok ? await r.json() : null;
+    const url = `https://site.api.espn.com/apis/site/v2/sports/soccer/${league}/scoreboard?dates=${dateStr}`;
+    const r = await fetch(url, { cache: 'no-store' });
+    if (!r.ok) return null;
+    const data = await r.json();
+    // 프랜들리: 날짜 필터로 빈 결과면 날짜 없이 재시도 (오늘 경기만)
+    if (league === 'fifa.friendly' && (!data?.events?.length)) {
+      const today = getDateStr(new Date());
+      if (dateStr === today) {
+        try {
+          const r2 = await fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/${league}/scoreboard`, { cache: 'no-store' });
+          if (r2.ok) return await r2.json();
+        } catch(e2) {}
+      }
+    }
+    return data;
   } catch(e) { return null; }
 }
 async function fetchStandings(league) {
@@ -1746,6 +1761,7 @@ function startDailyTracker() {
 function stopDailyTracker() {
   clearInterval(dailyTrackTimer);
   dailyTrackTimer = null;
+  saveDailyUsage(); // 멈추기 전에 반드시 저장
 }
 
 // ── 완전 잠금 (하루 한도 초과 — 퀴즈 없음, 비번만) ──
@@ -1908,19 +1924,27 @@ function unlockScreen() {
 }
 
 document.addEventListener('visibilitychange', () => {
-  if (dailyHardLocked) return;
-  if (screenLocked) {
-    if (!document.hidden) updateLockCountdown();
-    return;
-  }
   if (document.hidden) {
+    // 화면 꺼짐 → 즉시 저장
+    saveDailyUsage();
+    sgSave();
     clearTimeout(screenAlertTimer);
     stopDailyTracker();
-  } else {
-    sgLoad();
-    if (!screenLocked && !dailyHardLocked) startDailyTracker();
+    return;
   }
+  // 화면 켜짐 → 날짜 체크 포함 리로드
+  SCREEN_USE_LIMIT = loadScreenLimit();
+  sgLoad();
+  if (dailyHardLocked) return;
+  if (screenLocked) {
+    updateLockCountdown();
+    return;
+  }
+  startDailyTracker();
 });
+
+function saveAllState() { sgSave(); saveDailyUsage(); }
+document.addEventListener('freeze', saveAllState);
 
 // 시작
 // ── 화면 타이머 표시 ──
@@ -1955,7 +1979,17 @@ function startTimerDisplay() {
 
 sgLoad();
 startTimerDisplay();
-if (!screenLocked && !dailyHardLocked) startScreenTimer();
+if (!screenLocked && !dailyHardLocked) {
+  // sgLoad()가 이미 남은 세션 시간으로 scheduleScreenLock 설정함
+  // startScreenTimer()는 screenStartTime을 리셋하므로 호출하면 안됨
+  // sg_data가 없으면(첫 방문) startScreenTimer로 새 세션 시작
+  const hasSaved = sessionStorage.getItem('sg_data');
+  if (!hasSaved) {
+    startScreenTimer();
+  } else {
+    startDailyTracker();
+  }
+}
 
 // ===== SETTINGS (password protected) =====
 function openSettings() {
