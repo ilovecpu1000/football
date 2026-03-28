@@ -449,6 +449,24 @@
     .no-matches { text-align: center; padding: 40px 16px; color: #999; font-size: 14px; }
     .no-matches .icon { font-size: 40px; margin-bottom: 10px; }
 
+    /* Floating Timer Display */
+    .sg-timer-float {
+      position: fixed; top: 8px; right: 8px; z-index: 400;
+      background: rgba(0,0,0,0.75); backdrop-filter: blur(8px);
+      border-radius: 12px; padding: 6px 12px;
+      display: flex; align-items: center; gap: 6px;
+      font-size: 12px; color: #ccc;
+      border: 1px solid rgba(255,255,255,0.1);
+      pointer-events: none; transition: all 0.3s;
+    }
+    .sg-timer-float .sg-session { font-weight: 700; font-size: 14px; color: #4ade80; font-variant-numeric: tabular-nums; }
+    .sg-timer-float .sg-daily { font-size: 11px; color: #999; font-variant-numeric: tabular-nums; }
+    .sg-timer-float .sg-sep { width: 1px; height: 16px; background: rgba(255,255,255,0.15); }
+    .sg-timer-float.warn .sg-session { color: #fbbf24; }
+    .sg-timer-float.critical .sg-session { color: #ef4444; animation: pulse 1s infinite; }
+    .sg-timer-float.critical { border-color: rgba(239,68,68,0.4); }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+
     /* Screen Time Alert */
     .screen-alert-overlay {
       display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
@@ -704,7 +722,14 @@
     </div>
   </div>
 
-  <!-- Screen Lock (after 3 warnings) -->
+  <!-- Floating Timer -->
+  <div class="sg-timer-float" id="sgTimerFloat">
+    <span class="sg-session" id="sgSessionTime">--:--</span>
+    <span class="sg-sep"></span>
+    <span class="sg-daily" id="sgDailyTime">오늘 --분 남음</span>
+  </div>
+
+  <!-- Screen Lock -->
   <div class="screen-lock-overlay" id="screenLockOverlay">
     <div class="screen-lock-box">
       <div class="screen-lock-icon">🔒</div>
@@ -793,6 +818,7 @@ const LEAGUES = [
   { id: 'uefa.europa',      name: 'UEL',   espn: 'uefa.europa',    logo: 'https://a.espncdn.com/i/leaguelogos/soccer/500/2310.png' },
   { id: 'eng.fa',            name: 'FA',    espn: 'eng.fa',         logo: 'https://a.espncdn.com/i/leaguelogos/soccer/500/169.png' },
   { id: 'fifa.world',       name: 'WC',    espn: 'fifa.world',     logo: 'https://a.espncdn.com/i/leaguelogos/soccer/500/4.png' },
+  { id: 'fifa.friendly',    name: 'INT',   espn: 'fifa.friendly',  logo: 'https://a.espncdn.com/i/leaguelogos/soccer/500/7.png' },
 ];
 const ALL_SINGLE = LEAGUES.filter(l => l.espn !== null);
 
@@ -857,7 +883,7 @@ function init() {
 
 // ===== TABS =====
 // 컵 대회는 경기가 있을 때만 탭 표시
-const CUP_ONLY_LEAGUES = ['eng.fa', 'fifa.world'];
+const CUP_ONLY_LEAGUES = ['eng.fa', 'fifa.world', 'fifa.friendly'];
 let cupLeaguesWithMatches = new Set();
 
 function renderTabs() {
@@ -1088,6 +1114,7 @@ const LEAGUE_TZ = {
   'uefa.europa':    { tz: 'Europe/London',   label: 'UK' },
   'eng.fa':         { tz: 'Europe/London',   label: 'ENG' },
   'fifa.world':     { tz: 'Europe/London',   label: 'UK' },
+  'fifa.friendly':  { tz: 'Europe/London',   label: 'UK' },
 };
 
 function getTimeInTZ(dateStr, timezone) {
@@ -1289,9 +1316,9 @@ async function loadStandings() {
   }
 
   // 토너먼트(컵) 대회는 리그 순위표가 없음
-  const CUP_LEAGUES = ['eng.fa', 'fifa.world'];
+  const CUP_LEAGUES = ['eng.fa', 'fifa.world', 'fifa.friendly'];
   if (CUP_LEAGUES.includes(league.espn)) {
-    panel.innerHTML = '<div class="no-matches"><div class="icon">🏆</div>Cup tournament — no league table.<br><small>Match results are shown on the left.</small></div>';
+    panel.innerHTML = '<div class="no-matches"><div class="icon">🏆</div>Cup / Friendly — no league table.<br><small>Match results are shown on the left.</small></div>';
     return;
   }
 
@@ -1896,7 +1923,38 @@ document.addEventListener('visibilitychange', () => {
 });
 
 // 시작
+// ── 화면 타이머 표시 ──
+let sgTimerInterval = null;
+function updateTimerDisplay() {
+  const el = document.getElementById('sgTimerFloat');
+  if (!el) return;
+  if (screenLocked || dailyHardLocked) { el.style.display = 'none'; return; }
+  el.style.display = '';
+
+  const sessionElapsed = Date.now() - screenStartTime;
+  const sessionRemain = Math.max(0, SCREEN_USE_LIMIT - sessionElapsed);
+  const sMin = Math.floor(sessionRemain / 60000);
+  const sSec = Math.floor((sessionRemain % 60000) / 1000);
+  const sessionEl = document.getElementById('sgSessionTime');
+  if (sessionEl) sessionEl.textContent = sMin + ':' + (sSec < 10 ? '0' : '') + sSec;
+
+  const dailyRemain = Math.max(0, dailyAllowed - dailyUsed);
+  const dMin = Math.round(dailyRemain / 60000);
+  const dailyEl = document.getElementById('sgDailyTime');
+  if (dailyEl) dailyEl.textContent = '오늘 ' + dMin + '분 남음';
+
+  el.classList.remove('warn', 'critical');
+  if (sessionRemain < 60000) el.classList.add('critical');
+  else if (sessionRemain < 3 * 60000) el.classList.add('warn');
+}
+function startTimerDisplay() {
+  updateTimerDisplay();
+  clearInterval(sgTimerInterval);
+  sgTimerInterval = setInterval(updateTimerDisplay, 1000);
+}
+
 sgLoad();
+startTimerDisplay();
 if (!screenLocked && !dailyHardLocked) startScreenTimer();
 
 // ===== SETTINGS (password protected) =====
