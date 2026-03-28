@@ -1,10 +1,11 @@
 // ===== SCREEN TIME GUARDIAN (shared across all pages) =====
-// sessionStorage로 페이지간 시간 공유, localStorage로 설정값 저장
+// sessionStorage: 페이지간 세션 타이머 공유
+// localStorage: 설정값 + 하루 총 사용시간 저장
 const SCREEN_DEFAULT_MINUTES = 10;
-const SCREEN_LOCK_DURATION = 60 * 60 * 1000;
+const DAILY_LIMIT = 60 * 60 * 1000; // 하루 총 1시간
 const SCREEN_LOCK_PIN = '7479';
 
-// localStorage에서 설정값 로드 (하루 지나면 디폴트로 리셋)
+// ── 세션 타이머 설정값 (localStorage, 하루 지나면 리셋) ──
 function loadScreenLimit() {
   try {
     const raw = localStorage.getItem('sg_limit');
@@ -22,13 +23,113 @@ function loadScreenLimit() {
 
 let SCREEN_USE_LIMIT = loadScreenLimit();
 
+// ── 하루 총 사용시간 추적 (localStorage) ──
+function loadDailyUsage() {
+  try {
+    const raw = localStorage.getItem('sg_daily');
+    if (raw) {
+      const d = JSON.parse(raw);
+      const today = new Date().toISOString().slice(0, 10);
+      if (d.date === today) {
+        return { used: d.used || 0, allowed: d.allowed || DAILY_LIMIT, hardLocked: d.hardLocked || false };
+      }
+      // 날짜 다름 → 리셋
+      localStorage.removeItem('sg_daily');
+    }
+  } catch(e) {}
+  return { used: 0, allowed: DAILY_LIMIT, hardLocked: false };
+}
+function saveDailyUsage() {
+  try {
+    const today = new Date().toISOString().slice(0, 10);
+    localStorage.setItem('sg_daily', JSON.stringify({
+      date: today, used: dailyUsed, allowed: dailyAllowed, hardLocked: dailyHardLocked
+    }));
+  } catch(e) {}
+}
+
+let { used: dailyUsed, allowed: dailyAllowed, hardLocked: dailyHardLocked } = loadDailyUsage();
+
 let screenStartTime = Date.now();
 let screenAlertTimer = null;
 let screenLocked = false;
 let screenLockTime = null;
 let screenLockCountdown = null;
+let dailyTrackTimer = null; // 1초마다 사용시간 누적
 
-// sessionStorage sync
+// ── 하루 총 사용시간 체크 ──
+function isDailyLimitReached() {
+  return dailyUsed >= dailyAllowed;
+}
+
+function startDailyTracker() {
+  clearInterval(dailyTrackTimer);
+  dailyTrackTimer = setInterval(() => {
+    if (!screenLocked && !document.hidden) {
+      dailyUsed += 1000;
+      saveDailyUsage();
+      if (isDailyLimitReached()) {
+        clearInterval(dailyTrackTimer);
+        activateHardLock();
+      }
+    }
+  }, 1000);
+}
+
+function stopDailyTracker() {
+  clearInterval(dailyTrackTimer);
+  dailyTrackTimer = null;
+}
+
+// ── 완전 잠금 (하루 한도 초과 — 퀴즈 없음, 비번만) ──
+function activateHardLock() {
+  dailyHardLocked = true;
+  screenLocked = true;
+  screenLockTime = null;
+  clearTimeout(screenAlertTimer);
+  clearInterval(screenLockCountdown);
+  stopDailyTracker();
+  saveDailyUsage();
+  sgSave();
+
+  document.getElementById('screenLockInput').value = '';
+  document.getElementById('screenLockError').textContent = '';
+  document.getElementById('screenLockOverlay').classList.add('show');
+
+  // 퀴즈 패널 닫기
+  const qp = document.getElementById('quizPanel');
+  if (qp) qp.classList.remove('show');
+
+  // 하드락 UI: 퀴즈 버튼 숨기기, 카운트다운 대신 메시지
+  const divider = document.querySelector('#screenLockOverlay .screen-lock-divider');
+  const quizBtn = document.querySelector('#screenLockOverlay .quiz-challenge-btn');
+  if (divider) divider.style.display = 'none';
+  if (quizBtn) quizBtn.style.display = 'none';
+
+  document.querySelector('#screenLockOverlay .screen-lock-msg').innerHTML =
+    '오늘 사용 시간 끝! 📵<br>내일 다시 만나자!';
+  document.getElementById('screenLockSub').innerHTML =
+    `오늘 총 <b>${Math.round(dailyUsed/60000)}분</b> 사용했어요<br>아빠 비밀번호로만 풀 수 있어요`;
+}
+
+// ── 하드락에서 비번으로 풀기 (1시간 추가) ──
+function hardUnlock() {
+  dailyHardLocked = false;
+  dailyAllowed += DAILY_LIMIT; // 1시간 추가
+  saveDailyUsage();
+
+  // UI 복원
+  const divider = document.querySelector('#screenLockOverlay .screen-lock-divider');
+  const quizBtn = document.querySelector('#screenLockOverlay .quiz-challenge-btn');
+  if (divider) divider.style.display = '';
+  if (quizBtn) quizBtn.style.display = '';
+  document.querySelector('#screenLockOverlay .screen-lock-msg').innerHTML =
+    '사용 시간 초과!<br>잠금되었습니다';
+
+  doUnlock();
+}
+
+// ── sessionStorage sync (세션 타이머) ──
 function sgSave() {
   try {
     sessionStorage.setItem('sg_data', JSON.stringify({
@@ -40,23 +141,32 @@ function sgSave() {
 }
 function sgLoad() {
   try {
+    // 날짜 변경 체크 → 리셋
+    const daily = loadDailyUsage();
+    dailyUsed = daily.used;
+    dailyAllowed = daily.allowed;
+    dailyHardLocked = daily.hardLocked;
+
+    if (dailyHardLocked) {
+      setTimeout(() => activateHardLock(), 50);
+      return;
+    }
+    if (isDailyLimitReached()) {
+      setTimeout(() => activateHardLock(), 50);
+      return;
+    }
+
     const raw = sessionStorage.getItem('sg_data');
     if (!raw) return;
     const d = JSON.parse(raw);
     screenStartTime = d.start || Date.now();
     if (d.locked && d.lockTime) {
-      const elapsed = Date.now() - d.lockTime;
-      if (elapsed < SCREEN_LOCK_DURATION) {
-        screenLocked = true;
-        screenLockTime = d.lockTime;
-        setTimeout(() => activateLock(), 50);
-        return;
-      } else {
-        sessionStorage.removeItem('sg_data');
-        return;
-      }
+      screenLocked = true;
+      screenLockTime = d.lockTime;
+      setTimeout(() => activateLock(), 50);
+      return;
     }
-    // 남은 시간 계산 → 바로 잠금
+    // 남은 세션 시간 계산
     const elapsed = Date.now() - screenStartTime;
     if (elapsed < SCREEN_USE_LIMIT) {
       scheduleScreenLock(SCREEN_USE_LIMIT - elapsed);
@@ -68,10 +178,13 @@ function sgLoad() {
 
 function startScreenTimer() {
   if (screenLocked) return;
+  // 하루 한도 체크
+  if (isDailyLimitReached()) { activateHardLock(); return; }
   clearTimeout(screenAlertTimer);
   screenStartTime = Date.now();
   sgSave();
   scheduleScreenLock(SCREEN_USE_LIMIT);
+  startDailyTracker();
 }
 
 function scheduleScreenLock(delay) {
@@ -80,29 +193,42 @@ function scheduleScreenLock(delay) {
   screenAlertTimer = setTimeout(() => activateLock(), delay);
 }
 
+// ── 세션 잠금 (퀴즈로 풀 수 있음) ──
 function activateLock() {
+  // 하루 한도 체크 먼저
+  if (isDailyLimitReached()) { activateHardLock(); return; }
+
   screenLocked = true;
   screenLockTime = screenLockTime || Date.now();
   clearTimeout(screenAlertTimer);
+  stopDailyTracker();
   sgSave();
+
   document.getElementById('screenLockInput').value = '';
   document.getElementById('screenLockError').textContent = '';
+
+  // 퀴즈 버튼 보이게 (하드락 아님)
+  const divider = document.querySelector('#screenLockOverlay .screen-lock-divider');
+  const quizBtn = document.querySelector('#screenLockOverlay .quiz-challenge-btn');
+  if (divider) divider.style.display = '';
+  if (quizBtn) quizBtn.style.display = '';
+  document.querySelector('#screenLockOverlay .screen-lock-msg').innerHTML =
+    '사용 시간 초과!<br>잠금되었습니다';
+
   document.getElementById('screenLockOverlay').classList.add('show');
   updateLockCountdown();
   clearInterval(screenLockCountdown);
   screenLockCountdown = setInterval(updateLockCountdown, 1000);
+
   // 바로 프랑스어 퀴즈 시작
   setTimeout(() => startFrenchQuiz(), 300);
 }
 
 function updateLockCountdown() {
-  const elapsed = Date.now() - screenLockTime;
-  const remaining = SCREEN_LOCK_DURATION - elapsed;
-  if (remaining <= 0) { doUnlock(); return; }
-  const min = Math.floor(remaining / 60000);
-  const sec = Math.floor((remaining % 60000) / 1000);
+  const usedMin = Math.round(dailyUsed / 60000);
+  const remainMin = Math.max(0, Math.round((dailyAllowed - dailyUsed) / 60000));
   document.getElementById('screenLockSub').innerHTML =
-    `아빠한테 말해서 풀어달라고 해<br>⏱️ 자동 해제까지 <b>${min}분 ${sec < 10 ? '0' : ''}${sec}초</b>`;
+    `오늘 총 <b>${usedMin}분</b> 사용 · 남은 한도 <b>${remainMin}분</b><br>아빠한테 말해서 풀어달라고 해`;
 }
 
 function doUnlock() {
@@ -120,7 +246,11 @@ function unlockScreen() {
   const input = document.getElementById('screenLockInput');
   const error = document.getElementById('screenLockError');
   if (input.value === SCREEN_LOCK_PIN) {
-    doUnlock();
+    if (dailyHardLocked) {
+      hardUnlock();
+    } else {
+      doUnlock();
+    }
   } else {
     error.textContent = '비밀번호가 틀렸어요!';
     input.value = '';
@@ -133,20 +263,23 @@ function unlockScreen() {
 }
 
 document.addEventListener('visibilitychange', () => {
+  if (dailyHardLocked) return;
   if (screenLocked) {
     if (!document.hidden) updateLockCountdown();
     return;
   }
   if (document.hidden) {
     clearTimeout(screenAlertTimer);
+    stopDailyTracker();
   } else {
-    sgLoad(); // 다른 페이지에서 변경된 상태 로드
+    sgLoad();
+    if (!screenLocked && !dailyHardLocked) startDailyTracker();
   }
 });
 
 // 페이지 떠날 때 상태 저장
-window.addEventListener('beforeunload', sgSave);
-window.addEventListener('pagehide', sgSave);
+window.addEventListener('beforeunload', () => { sgSave(); saveDailyUsage(); });
+window.addEventListener('pagehide', () => { sgSave(); saveDailyUsage(); });
 
 // ===== FRENCH VOCABULARY QUIZ (300+ essential words) =====
 const FRENCH_VOCAB = [
@@ -461,6 +594,8 @@ function showQuizResult() {
 
 function quizUnlock() {
   document.getElementById('quizPanel').classList.remove('show');
+  // 하루 한도 체크
+  if (isDailyLimitReached()) { activateHardLock(); return; }
   screenLocked = false; screenLockTime = null;
   clearInterval(screenLockCountdown); screenLockCountdown = null;
   document.getElementById('screenLockOverlay').classList.remove('show');
@@ -468,6 +603,7 @@ function quizUnlock() {
   clearTimeout(screenAlertTimer);
   sgSave();
   scheduleScreenLock(SCREEN_USE_LIMIT);
+  startDailyTracker();
 }
 
 function closeQuiz() {
@@ -477,7 +613,9 @@ function closeQuiz() {
 // Init: load state and start
 function initScreenGuard() {
   sgLoad();
+  if (dailyHardLocked) return; // 이미 하드락
   if (!screenLocked && !screenAlertTimer) {
+    if (isDailyLimitReached()) { activateHardLock(); return; }
     const elapsed = Date.now() - screenStartTime;
     if (elapsed < SCREEN_USE_LIMIT) {
       scheduleScreenLock(SCREEN_USE_LIMIT - elapsed);
@@ -485,4 +623,5 @@ function initScreenGuard() {
       activateLock();
     }
   }
+  if (!screenLocked) startDailyTracker();
 }
