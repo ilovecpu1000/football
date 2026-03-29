@@ -168,8 +168,9 @@ canvas#nextCanvas {
 .gameover-box {
   background: linear-gradient(135deg, #1a1a2e, #16213e);
   border-radius: 20px; padding: 30px; text-align: center;
-  border: 1px solid #333; max-width: 320px; width: 90%;
+  border: 1px solid #333; max-width: 340px; width: 90%;
   animation: popIn 0.4s ease-out;
+  max-height: 90vh; overflow-y: auto;
 }
 @keyframes popIn {
   0% { transform: scale(0.7); opacity: 0; }
@@ -178,15 +179,39 @@ canvas#nextCanvas {
 .gameover-icon { font-size: 50px; margin-bottom: 10px; }
 .gameover-title { font-size: 24px; font-weight: 700; color: #ff2d95; margin-bottom: 6px; }
 .gameover-score { font-size: 16px; color: #aaa; margin-bottom: 4px; }
-.gameover-best { font-size: 14px; color: #f5a623; margin-bottom: 20px; }
+.gameover-best { font-size: 14px; color: #f5a623; margin-bottom: 12px; }
+.gameover-name-input {
+  width: 180px; padding: 10px 14px; border: 2px solid #7b2ff7;
+  border-radius: 12px; font-size: 16px; text-align: center;
+  background: #2a2a3e; color: #fff; outline: none; margin-bottom: 8px;
+}
+.gameover-name-input:focus { border-color: #00d4ff; }
+.gameover-name-label { font-size: 13px; color: #888; margin-bottom: 6px; }
 .gameover-btn {
   padding: 12px 30px; border-radius: 30px; border: none;
-  font-size: 16px; font-weight: 700; cursor: pointer; margin: 0 6px;
+  font-size: 16px; font-weight: 700; cursor: pointer; margin: 4px 6px;
   transition: transform 0.2s;
 }
 .gameover-btn:hover { transform: scale(1.05); }
 .gameover-btn.retry { background: #7b2ff7; color: #fff; }
 .gameover-btn.menu { background: #333; color: #fff; }
+.gameover-btn.save { background: #2ecc71; color: #fff; }
+/* Leaderboard */
+.leaderboard { margin-top: 12px; text-align: left; }
+.leaderboard-title { font-size: 14px; font-weight: 700; color: #f5a623; text-align: center; margin-bottom: 8px; }
+.lb-row {
+  display: flex; align-items: center; gap: 8px; padding: 6px 10px;
+  border-radius: 8px; font-size: 13px; margin-bottom: 3px;
+}
+.lb-row:nth-child(odd) { background: rgba(255,255,255,0.03); }
+.lb-rank { width: 24px; font-weight: 700; color: #888; text-align: center; }
+.lb-rank.gold { color: #f5a623; }
+.lb-rank.silver { color: #c0c0c0; }
+.lb-rank.bronze { color: #cd7f32; }
+.lb-name { flex: 1; color: #ddd; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lb-name.highlight { color: #00d4ff; }
+.lb-score { color: #aaa; font-variant-numeric: tabular-nums; }
+.lb-date { color: #666; font-size: 11px; }
 
 /* Pause Overlay */
 .pause-overlay {
@@ -219,7 +244,7 @@ canvas#nextCanvas {
     <h1>🧱 테트리스! Tetris Time!</h1>
     <div class="subtitle">블록을 쌓아라! Stack the Blocks!</div>
     <div>
-      <a href="index.html" class="nav-btn">⚽ Football</a>
+      <a href="football.html" class="nav-btn">⚽ Football</a>
       <a href="chess-yeonseong.html" class="nav-btn chess-btn">♟️ Chess</a>
     </div>
   </div>
@@ -232,6 +257,7 @@ canvas#nextCanvas {
       🎮 게임 시작 | START
     </button>
     <div class="high-score-display" id="highScoreDisplay"></div>
+    <div id="menuLeaderboard" style="width:100%;max-width:320px;margin-top:12px;"></div>
   </div>
 
   <!-- Game -->
@@ -279,7 +305,16 @@ canvas#nextCanvas {
       <div class="gameover-title">GAME OVER</div>
       <div class="gameover-score" id="finalScore">Score: 0</div>
       <div class="gameover-best" id="finalBest"></div>
-      <div>
+      <div id="nameInputArea" style="display:none;">
+        <div class="gameover-name-label">🏆 이름을 입력하세요!</div>
+        <input type="text" class="gameover-name-input" id="playerNameInput"
+               placeholder="이름" maxlength="10"
+               onkeydown="if(event.key==='Enter')saveScoreAndShow()">
+        <br>
+        <button class="gameover-btn save" onclick="saveScoreAndShow()">💾 저장</button>
+      </div>
+      <div id="gameoverLeaderboard"></div>
+      <div style="margin-top:12px;">
         <button class="gameover-btn retry" onclick="startGame()">🔄 다시 | Retry</button>
         <button class="gameover-btn menu" onclick="showMenuScreen()">🏠 메뉴</button>
       </div>
@@ -363,16 +398,67 @@ function showGameScreen() {
   document.getElementById('gameScreen').style.display = 'flex';
 }
 
-// ===== HIGH SCORE =====
-function loadHighScore() {
-  try { highScore = parseInt(sessionStorage.getItem('tetris_high') || '0'); } catch(e) { highScore = 0; }
+// ===== LEADERBOARD (Top 10, localStorage) =====
+const LB_KEY = 'tetris_leaderboard';
+const LB_MAX = 10;
+
+function loadLeaderboard() {
+  try {
+    const raw = localStorage.getItem(LB_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch(e) { return []; }
 }
-function saveHighScore() {
-  try { sessionStorage.setItem('tetris_high', highScore.toString()); } catch(e) {}
+function saveLeaderboard(lb) {
+  try { localStorage.setItem(LB_KEY, JSON.stringify(lb)); } catch(e) {}
+}
+function addToLeaderboard(name, sc) {
+  const lb = loadLeaderboard();
+  const today = new Date().toISOString().slice(0, 10);
+  lb.push({ name: name.trim() || '???', score: sc, date: today });
+  lb.sort((a, b) => b.score - a.score);
+  if (lb.length > LB_MAX) lb.length = LB_MAX;
+  saveLeaderboard(lb);
+  return lb;
+}
+function isHighScore(sc) {
+  if (sc <= 0) return false;
+  const lb = loadLeaderboard();
+  if (lb.length < LB_MAX) return true;
+  return sc > lb[lb.length - 1].score;
+}
+function renderLeaderboard(containerId, highlightScore) {
+  const lb = loadLeaderboard();
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  if (lb.length === 0) { el.innerHTML = ''; return; }
+  const rankIcons = ['🥇','🥈','🥉'];
+  const rankClass = ['gold','silver','bronze'];
+  let html = '<div class="leaderboard"><div class="leaderboard-title">🏆 순위 | Leaderboard</div>';
+  lb.forEach((entry, i) => {
+    const icon = rankIcons[i] || '';
+    const cls = rankClass[i] || '';
+    const hl = (highlightScore !== undefined && entry.score === highlightScore) ? ' highlight' : '';
+    html += `<div class="lb-row">
+      <span class="lb-rank ${cls}">${icon || (i+1)}</span>
+      <span class="lb-name${hl}">${escHtml(entry.name)}</span>
+      <span class="lb-score">${entry.score.toLocaleString()}</span>
+      <span class="lb-date">${entry.date || ''}</span>
+    </div>`;
+  });
+  html += '</div>';
+  el.innerHTML = html;
+}
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function loadHighScore() {
+  const lb = loadLeaderboard();
+  highScore = lb.length > 0 ? lb[0].score : 0;
 }
 function updateHighScoreDisplay() {
   const el = document.getElementById('highScoreDisplay');
   el.textContent = highScore > 0 ? `🏆 최고점 Best: ${highScore.toLocaleString()}` : '';
+  renderLeaderboard('menuLeaderboard');
 }
 
 // ===== GAME START =====
@@ -577,13 +663,34 @@ function spawnNext() {
 function gameOver() {
   gameActive = false;
   clearInterval(dropTimer);
-  const isNew = score > highScore;
-  if (isNew) { highScore = score; saveHighScore(); }
+  const qualifies = isHighScore(score);
   document.getElementById('finalScore').textContent = `Score: ${score.toLocaleString()}`;
-  document.getElementById('finalBest').textContent = isNew
-    ? '🎉 새 최고점! NEW HIGH SCORE!'
+  document.getElementById('finalBest').textContent = qualifies
+    ? '🎉 TOP 10 진입! 이름을 입력하세요!'
     : `🏆 최고점 Best: ${highScore.toLocaleString()}`;
+
+  // 이름 입력 표시 여부
+  const nameArea = document.getElementById('nameInputArea');
+  if (qualifies) {
+    nameArea.style.display = '';
+    document.getElementById('playerNameInput').value = '';
+    setTimeout(() => document.getElementById('playerNameInput').focus(), 400);
+    document.getElementById('gameoverLeaderboard').innerHTML = '';
+  } else {
+    nameArea.style.display = 'none';
+    renderLeaderboard('gameoverLeaderboard');
+  }
   document.getElementById('gameoverOverlay').classList.add('active');
+}
+
+function saveScoreAndShow() {
+  const nameInput = document.getElementById('playerNameInput');
+  const name = nameInput.value.trim() || '연성';
+  addToLeaderboard(name, score);
+  highScore = loadLeaderboard()[0]?.score || 0;
+  document.getElementById('nameInputArea').style.display = 'none';
+  document.getElementById('finalBest').textContent = '🎉 저장 완료!';
+  renderLeaderboard('gameoverLeaderboard', score);
 }
 
 // ===== DROP TIMER =====

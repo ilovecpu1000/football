@@ -728,7 +728,7 @@
     <span class="sg-session" id="sgSessionTime">--:--</span>
     <span class="sg-sep"></span>
     <span class="sg-daily" id="sgDailyTime">오늘 --분 남음</span>
-    <span class="sg-ver">v14</span>
+    <span class="sg-ver">v15</span>
   </div>
 
   <!-- Screen Lock -->
@@ -2319,10 +2319,172 @@ const FRENCH_VOCAB = [
   {fr:'une femme',en:'a woman',ko:'여자',cat:'family'},{fr:'un garçon',en:'a boy',ko:'소년',cat:'family'},
 ];
 
+// ===== LATIN QUIZ (beginner-intermediate vocab + grammar) =====
+const LATIN_VOCAB = [
+  // ── Verbs (1st conjugation) ──
+  {la:'amāre',en:'to love',cat:'verb'},{la:'laudāre',en:'to praise',cat:'verb'},
+  {la:'vocāre',en:'to call',cat:'verb'},{la:'portāre',en:'to carry',cat:'verb'},
+  {la:'nārrāre',en:'to tell / narrate',cat:'verb'},{la:'labōrāre',en:'to work',cat:'verb'},
+  {la:'pugnāre',en:'to fight',cat:'verb'},{la:'navigāre',en:'to sail',cat:'verb'},
+  {la:'spectāre',en:'to watch / look at',cat:'verb'},{la:'parāre',en:'to prepare',cat:'verb'},
+  {la:'superāre',en:'to overcome',cat:'verb'},{la:'errāre',en:'to wander / err',cat:'verb'},
+  {la:'negāre',en:'to deny',cat:'verb'},{la:'iuvāre',en:'to help / please',cat:'verb'},
+  {la:'servāre',en:'to save / keep',cat:'verb'},{la:'stāre',en:'to stand',cat:'verb'},
+  {la:'dāre',en:'to give',cat:'verb'},{la:'rogāre',en:'to ask',cat:'verb'},
+  {la:'cēnāre',en:'to dine',cat:'verb'},{la:'habitāre',en:'to live / inhabit',cat:'verb'},
+  // ── Verbs (2nd conjugation) ──
+  {la:'monēre',en:'to warn / advise',cat:'verb'},{la:'habēre',en:'to have / hold',cat:'verb'},
+  {la:'vidēre',en:'to see',cat:'verb'},{la:'timēre',en:'to fear',cat:'verb'},
+  {la:'docēre',en:'to teach',cat:'verb'},{la:'tenēre',en:'to hold / keep',cat:'verb'},
+  {la:'movēre',en:'to move',cat:'verb'},{la:'respondēre',en:'to answer',cat:'verb'},
+  {la:'manēre',en:'to remain / stay',cat:'verb'},{la:'ridēre',en:'to laugh',cat:'verb'},
+  {la:'sedēre',en:'to sit',cat:'verb'},{la:'valēre',en:'to be strong / well',cat:'verb'},
+  // ── Verbs (3rd conjugation) ──
+  {la:'dūcere',en:'to lead',cat:'verb'},{la:'dīcere',en:'to say / speak',cat:'verb'},
+  {la:'scrībere',en:'to write',cat:'verb'},{la:'legere',en:'to read / choose',cat:'verb'},
+  {la:'mittere',en:'to send',cat:'verb'},{la:'vincere',en:'to conquer',cat:'verb'},
+  {la:'currere',en:'to run',cat:'verb'},{la:'agere',en:'to do / drive',cat:'verb'},
+  {la:'petere',en:'to seek / attack',cat:'verb'},{la:'pōnere',en:'to put / place',cat:'verb'},
+  {la:'quaerere',en:'to seek / ask',cat:'verb'},{la:'cadere',en:'to fall',cat:'verb'},
+  {la:'bibere',en:'to drink',cat:'verb'},{la:'crēdere',en:'to believe / trust',cat:'verb'},
+  {la:'gēnere',en:'to produce / create',cat:'verb'},{la:'ostendere',en:'to show',cat:'verb'},
+  {la:'sūmere',en:'to take up',cat:'verb'},{la:'vertere',en:'to turn',cat:'verb'},
+  // ── Verbs (4th conjugation) ──
+  {la:'audīre',en:'to hear / listen',cat:'verb'},{la:'venīre',en:'to come',cat:'verb'},
+  {la:'dormīre',en:'to sleep',cat:'verb'},{la:'scīre',en:'to know',cat:'verb'},
+  {la:'sentīre',en:'to feel / perceive',cat:'verb'},{la:'aperīre',en:'to open',cat:'verb'},
+  {la:'invenīre',en:'to find / discover',cat:'verb'},{la:'munīre',en:'to fortify',cat:'verb'},
+  // ── Irregular Verbs ──
+  {la:'esse',en:'to be',cat:'verb'},{la:'posse',en:'to be able',cat:'verb'},
+  {la:'ferre',en:'to carry / bear',cat:'verb'},{la:'īre',en:'to go',cat:'verb'},
+  {la:'velle',en:'to want / wish',cat:'verb'},{la:'nōlle',en:'to not want',cat:'verb'},
+  {la:'mālle',en:'to prefer',cat:'verb'},{la:'fierī',en:'to become / be made',cat:'verb'},
+  // ── Nouns (1st declension) ──
+  {la:'puella',en:'girl',cat:'noun'},{la:'fēmina',en:'woman',cat:'noun'},
+  {la:'aqua',en:'water',cat:'noun'},{la:'terra',en:'earth / land',cat:'noun'},
+  {la:'via',en:'road / way',cat:'noun'},{la:'patria',en:'fatherland / country',cat:'noun'},
+  {la:'insula',en:'island',cat:'noun'},{la:'fortūna',en:'fortune / luck',cat:'noun'},
+  {la:'silva',en:'forest / woods',cat:'noun'},{la:'vita',en:'life',cat:'noun'},
+  {la:'porta',en:'gate / door',cat:'noun'},{la:'fīlia',en:'daughter',cat:'noun'},
+  {la:'causa',en:'cause / reason',cat:'noun'},{la:'cūra',en:'care / concern',cat:'noun'},
+  {la:'glōria',en:'glory / fame',cat:'noun'},{la:'poena',en:'punishment / penalty',cat:'noun'},
+  {la:'pecūnia',en:'money',cat:'noun'},{la:'rēgīna',en:'queen',cat:'noun'},
+  {la:'sapientia',en:'wisdom',cat:'noun'},{la:'victōria',en:'victory',cat:'noun'},
+  // ── Nouns (2nd declension) ──
+  {la:'amīcus',en:'friend',cat:'noun'},{la:'puer',en:'boy',cat:'noun'},
+  {la:'vir',en:'man',cat:'noun'},{la:'dominus',en:'master / lord',cat:'noun'},
+  {la:'servus',en:'slave / servant',cat:'noun'},{la:'fīlius',en:'son',cat:'noun'},
+  {la:'deus',en:'god',cat:'noun'},{la:'populus',en:'people / nation',cat:'noun'},
+  {la:'animus',en:'mind / spirit',cat:'noun'},{la:'campus',en:'field / plain',cat:'noun'},
+  {la:'bellum',en:'war',cat:'noun'},{la:'dōnum',en:'gift',cat:'noun'},
+  {la:'oppidum',en:'town',cat:'noun'},{la:'periculum',en:'danger',cat:'noun'},
+  {la:'verbum',en:'word',cat:'noun'},{la:'cōnsilium',en:'plan / advice',cat:'noun'},
+  {la:'imperium',en:'command / empire',cat:'noun'},{la:'regnum',en:'kingdom',cat:'noun'},
+  {la:'templum',en:'temple',cat:'noun'},{la:'caelum',en:'sky / heaven',cat:'noun'},
+  // ── Nouns (3rd declension) ──
+  {la:'rēx',en:'king',cat:'noun'},{la:'lēx',en:'law',cat:'noun'},
+  {la:'vōx',en:'voice',cat:'noun'},{la:'pāx',en:'peace',cat:'noun'},
+  {la:'lūx',en:'light',cat:'noun'},{la:'nox',en:'night',cat:'noun'},
+  {la:'mīles',en:'soldier',cat:'noun'},{la:'dux',en:'leader / general',cat:'noun'},
+  {la:'pater',en:'father',cat:'noun'},{la:'māter',en:'mother',cat:'noun'},
+  {la:'frāter',en:'brother',cat:'noun'},{la:'soror',en:'sister',cat:'noun'},
+  {la:'homō',en:'human / person',cat:'noun'},{la:'nōmen',en:'name',cat:'noun'},
+  {la:'tempus',en:'time',cat:'noun'},{la:'corpus',en:'body',cat:'noun'},
+  {la:'caput',en:'head',cat:'noun'},{la:'iter',en:'journey / route',cat:'noun'},
+  {la:'flūmen',en:'river',cat:'noun'},{la:'mare',en:'sea',cat:'noun'},
+  {la:'urbs',en:'city',cat:'noun'},{la:'mōns',en:'mountain',cat:'noun'},
+  {la:'cīvis',en:'citizen',cat:'noun'},{la:'virtūs',en:'courage / virtue',cat:'noun'},
+  {la:'mors',en:'death',cat:'noun'},{la:'salūs',en:'safety / health',cat:'noun'},
+  // ── Adjectives ──
+  {la:'bonus',en:'good',cat:'adj'},{la:'malus',en:'bad / evil',cat:'adj'},
+  {la:'magnus',en:'great / large',cat:'adj'},{la:'parvus',en:'small / little',cat:'adj'},
+  {la:'longus',en:'long',cat:'adj'},{la:'novus',en:'new',cat:'adj'},
+  {la:'antīquus',en:'ancient / old',cat:'adj'},{la:'pulcher',en:'beautiful',cat:'adj'},
+  {la:'fortis',en:'brave / strong',cat:'adj'},{la:'fēlīx',en:'happy / lucky',cat:'adj'},
+  {la:'gravis',en:'heavy / serious',cat:'adj'},{la:'levis',en:'light / trivial',cat:'adj'},
+  {la:'brevis',en:'short / brief',cat:'adj'},{la:'facilis',en:'easy',cat:'adj'},
+  {la:'difficilis',en:'difficult',cat:'adj'},{la:'omnis',en:'every / all',cat:'adj'},
+  {la:'multus',en:'much / many',cat:'adj'},{la:'paucī',en:'few',cat:'adj'},
+  {la:'sōlus',en:'alone / only',cat:'adj'},{la:'tōtus',en:'whole / entire',cat:'adj'},
+  {la:'prīmus',en:'first',cat:'adj'},{la:'ultimus',en:'last / final',cat:'adj'},
+  {la:'liber',en:'free',cat:'adj'},{la:'sacer',en:'sacred / holy',cat:'adj'},
+  {la:'celer',en:'swift / fast',cat:'adj'},{la:'acer',en:'sharp / fierce',cat:'adj'},
+  {la:'certus',en:'certain / sure',cat:'adj'},{la:'dīgnus',en:'worthy',cat:'adj'},
+  // ── Adverbs & Prepositions ──
+  {la:'semper',en:'always',cat:'adverb'},{la:'numquam',en:'never',cat:'adverb'},
+  {la:'saepe',en:'often',cat:'adverb'},{la:'iam',en:'now / already',cat:'adverb'},
+  {la:'nōn',en:'not',cat:'adverb'},{la:'bene',en:'well',cat:'adverb'},
+  {la:'male',en:'badly',cat:'adverb'},{la:'magnopere',en:'greatly',cat:'adverb'},
+  {la:'diū',en:'for a long time',cat:'adverb'},{la:'mox',en:'soon',cat:'adverb'},
+  {la:'tamen',en:'however / nevertheless',cat:'adverb'},{la:'etiam',en:'also / even',cat:'adverb'},
+  {la:'cum',en:'with (+ abl.)',cat:'prep'},{la:'in',en:'in / into (+ abl./acc.)',cat:'prep'},
+  {la:'ex / ē',en:'out of / from',cat:'prep'},{la:'ad',en:'to / toward (+ acc.)',cat:'prep'},
+  {la:'per',en:'through (+ acc.)',cat:'prep'},{la:'prō',en:'for / on behalf of (+ abl.)',cat:'prep'},
+  {la:'sine',en:'without (+ abl.)',cat:'prep'},{la:'inter',en:'between / among (+ acc.)',cat:'prep'},
+  {la:'post',en:'after / behind (+ acc.)',cat:'prep'},{la:'ante',en:'before / in front of (+ acc.)',cat:'prep'},
+  {la:'sub',en:'under (+ abl./acc.)',cat:'prep'},{la:'dē',en:'down from / about (+ abl.)',cat:'prep'},
+  {la:'trāns',en:'across (+ acc.)',cat:'prep'},{la:'propter',en:'because of (+ acc.)',cat:'prep'},
+  // ── Phrases ──
+  {la:'carpe diem',en:'seize the day',cat:'phrase'},{la:'vēnī, vīdī, vīcī',en:'I came, I saw, I conquered',cat:'phrase'},
+  {la:'in memoriam',en:'in memory (of)',cat:'phrase'},{la:'ad hoc',en:'for this (purpose)',cat:'phrase'},
+  {la:'et cetera',en:'and the rest',cat:'phrase'},{la:'per sē',en:'by itself / in itself',cat:'phrase'},
+  {la:'vice versā',en:'the other way around',cat:'phrase'},{la:'bonā fidē',en:'in good faith',cat:'phrase'},
+  {la:'status quō',en:'the existing state',cat:'phrase'},{la:'alma māter',en:'nourishing mother',cat:'phrase'},
+];
+const LATIN_GRAMMAR = [
+  {q:'amō, amās, amat — what conjugation?',a:'1st conjugation',opts:['1st conjugation','2nd conjugation','3rd conjugation','4th conjugation'],cat:'conjugation'},
+  {q:'moneō, monēs, monet — what conjugation?',a:'2nd conjugation',opts:['1st conjugation','2nd conjugation','3rd conjugation','4th conjugation'],cat:'conjugation'},
+  {q:'dūcō, dūcis, dūcit — what conjugation?',a:'3rd conjugation',opts:['1st conjugation','2nd conjugation','3rd conjugation','4th conjugation'],cat:'conjugation'},
+  {q:'audiō, audīs, audit — what conjugation?',a:'4th conjugation',opts:['1st conjugation','2nd conjugation','3rd conjugation','4th conjugation'],cat:'conjugation'},
+  {q:'"amāmus" means:',a:'we love',opts:['we love','they love','you (pl.) love','I love'],cat:'conjugation'},
+  {q:'"vidēs" means:',a:'you see',opts:['you see','he sees','they see','I see'],cat:'conjugation'},
+  {q:'"dūcunt" means:',a:'they lead',opts:['they lead','we lead','he leads','you lead'],cat:'conjugation'},
+  {q:'"audīmus" means:',a:'we hear',opts:['we hear','I hear','they hear','you hear'],cat:'conjugation'},
+  {q:'"est" is the 3rd person singular of:',a:'esse (to be)',opts:['esse (to be)','īre (to go)','edere (to eat)','ferre (to carry)'],cat:'conjugation'},
+  {q:'"sunt" means:',a:'they are',opts:['they are','we are','you are','he/she is'],cat:'conjugation'},
+  {q:'"possum" means:',a:'I am able / I can',opts:['I am able / I can','I put','I carry','I want'],cat:'conjugation'},
+  {q:'"it" (from īre) means:',a:'he/she goes',opts:['he/she goes','it is','he does','he carries'],cat:'conjugation'},
+  {q:'"ferō" means:',a:'I carry / bear',opts:['I carry / bear','I fear','I strike','I am wild'],cat:'conjugation'},
+  {q:'"vult" (from velle) means:',a:'he/she wants',opts:['he/she wants','he/she turns','he/she flies','he/she conquers'],cat:'conjugation'},
+  {q:'Present infinitive of 1st conj. ends in:',a:'-āre',opts:['-āre','-ēre','-ere','-īre'],cat:'conjugation'},
+  {q:'Present infinitive of 2nd conj. ends in:',a:'-ēre',opts:['-āre','-ēre','-ere','-īre'],cat:'conjugation'},
+  {q:'Nominative case is used for:',a:'subject of sentence',opts:['subject of sentence','direct object','possession','indirect object'],cat:'declension'},
+  {q:'Accusative case is used for:',a:'direct object',opts:['direct object','subject','possession','means / instrument'],cat:'declension'},
+  {q:'Genitive case is used for:',a:'possession (of)',opts:['possession (of)','direct object','indirect object','subject'],cat:'declension'},
+  {q:'Dative case is used for:',a:'indirect object (to/for)',opts:['indirect object (to/for)','direct object','subject','agent'],cat:'declension'},
+  {q:'Ablative case is used for:',a:'by / with / from / in',opts:['by / with / from / in','direct object','subject','possession'],cat:'declension'},
+  {q:'"puella" is which declension?',a:'1st declension',opts:['1st declension','2nd declension','3rd declension','4th declension'],cat:'declension'},
+  {q:'"amīcus" is which declension?',a:'2nd declension',opts:['1st declension','2nd declension','3rd declension','4th declension'],cat:'declension'},
+  {q:'"rēx, rēgis" is which declension?',a:'3rd declension',opts:['1st declension','2nd declension','3rd declension','4th declension'],cat:'declension'},
+  {q:'1st declension nominative plural ends in:',a:'-ae',opts:['-ae','-ī','-ēs','-a'],cat:'declension'},
+  {q:'2nd declension nominative plural (-us) ends in:',a:'-ī',opts:['-ae','-ī','-ēs','-a'],cat:'declension'},
+  {q:'"puellam" is in which case?',a:'accusative singular',opts:['accusative singular','nominative singular','genitive singular','ablative singular'],cat:'declension'},
+  {q:'"puellārum" is in which case?',a:'genitive plural',opts:['genitive plural','dative plural','ablative plural','accusative plural'],cat:'declension'},
+  {q:'"amīcō" could be which case?',a:'dative or ablative singular',opts:['dative or ablative singular','nominative singular','accusative singular','genitive singular'],cat:'declension'},
+  {q:'"bellum" (2nd decl. neuter) accusative is:',a:'bellum (same as nom.)',opts:['bellum (same as nom.)','bellī','bellō','bella'],cat:'declension'},
+  {q:'Neuter plural nom./acc. always ends in:',a:'-a',opts:['-a','-ī','-ēs','-ae'],cat:'declension'},
+  {q:'"rēgem" is in which case?',a:'accusative singular',opts:['accusative singular','nominative singular','ablative singular','genitive singular'],cat:'declension'},
+  {q:'Latin word order is typically:',a:'SOV (Subject-Object-Verb)',opts:['SOV (Subject-Object-Verb)','SVO (Subject-Verb-Object)','VSO (Verb-Subject-Object)','OSV (Object-Subject-Verb)'],cat:'grammar'},
+  {q:'How many noun declensions in Latin?',a:'5',opts:['5','4','3','6'],cat:'grammar'},
+  {q:'How many verb conjugations in Latin?',a:'4',opts:['4','3','5','6'],cat:'grammar'},
+  {q:'"Puella puerum amat" means:',a:'The girl loves the boy',opts:['The girl loves the boy','The boy loves the girl','The girls love the boy','The boy sees the girl'],cat:'grammar'},
+  {q:'"Servus dominum timet" means:',a:'The slave fears the master',opts:['The slave fears the master','The master fears the slave','The slaves fear','The slave is feared'],cat:'grammar'},
+  {q:'Which is a perfect tense ending?',a:'-vī',opts:['-vī','-bō','-bam','-ō'],cat:'grammar'},
+  {q:'"amāvit" means:',a:'he/she loved (perfect)',opts:['he/she loved (perfect)','he/she loves','he/she will love','he/she was loving'],cat:'grammar'},
+  {q:'"-bat" / "-bam" endings indicate:',a:'imperfect tense',opts:['imperfect tense','perfect tense','future tense','present tense'],cat:'grammar'},
+  {q:'"amābat" means:',a:'he/she was loving / used to love',opts:['he/she was loving / used to love','he/she loved (once)','he/she will love','he/she loves'],cat:'grammar'},
+  {q:'"-bit" / "-bō" endings indicate:',a:'future tense',opts:['future tense','imperfect tense','perfect tense','present tense'],cat:'grammar'},
+  {q:'"amābit" means:',a:'he/she will love',opts:['he/she will love','he/she loved','he/she loves','he/she was loving'],cat:'grammar'},
+  {q:'The imperative "audī!" means:',a:'Listen! (singular)',opts:['Listen! (singular)','He hears','To hear','They hear'],cat:'grammar'},
+  {q:'In "Rōmam eō", why accusative?',a:'motion toward (to Rome)',opts:['motion toward (to Rome)','it is the subject','possession','indirect object'],cat:'grammar'},
+  {q:'"Cum amīcīs" means:',a:'with friends',opts:['with friends','of friends','for friends','friends (subject)'],cat:'grammar'},
+];
+
 const CAT_ICONS = {
   verb:'🏃',adj:'📐',adverb:'⚡',preposition:'📍',society:'🏙️',emotion:'💖',
   time:'📅',school:'📚',food:'🍽️',phrase:'💬',nature:'🌿',house:'🏠',
-  body:'🫀',family:'👨‍👩‍👧‍👦'
+  body:'🫀',family:'👨‍👩‍👧‍👦',
+  noun:'📜',prep:'📍',conjugation:'🔧',declension:'📊',grammar:'🏛️'
 };
 
 const QUIZ_TOTAL = 10;
@@ -2331,6 +2493,8 @@ let quizQuestions = [];
 let quizCurrent = 0;
 let quizCorrect = 0;
 let quizAnswered = false;
+let quizLang = localStorage.getItem('sg_quiz_lang') || 'fr';
+let usedFrIndices = [], usedLaVocabIndices = [], usedLaGramIndices = [];
 
 function shuffle(arr) {
   const a = [...arr];
@@ -2341,28 +2505,85 @@ function shuffle(arr) {
   return a;
 }
 
-function startFrenchQuiz() {
-  // Pick 10 random words
-  const pool = shuffle(FRENCH_VOCAB);
-  quizQuestions = pool.slice(0, QUIZ_TOTAL).map(word => {
-    // Generate 3 wrong answers (same category preferred)
-    const sameCat = FRENCH_VOCAB.filter(w => w.cat === word.cat && w.en !== word.en);
-    const diffCat = FRENCH_VOCAB.filter(w => w.en !== word.en);
-    let wrongPool = sameCat.length >= 3 ? shuffle(sameCat) : shuffle(diffCat);
-    const wrongs = wrongPool.slice(0, 3).map(w => w.en);
-    const options = shuffle([word.en, ...wrongs]);
-    return { ...word, options, answer: word.en };
-  });
-  quizCurrent = 0;
-  quizCorrect = 0;
-  quizAnswered = false;
+// ── 겹치지 않게 문제 뽑기 ──
+function pickUnused(pool, usedArr, count) {
+  if (usedArr.length >= pool.length) usedArr.length = 0;
+  const available = [];
+  for (let i = 0; i < pool.length; i++) {
+    if (!usedArr.includes(i)) available.push(i);
+  }
+  const shuffled = shuffle(available);
+  const picked = shuffled.slice(0, Math.min(count, shuffled.length));
+  picked.forEach(i => usedArr.push(i));
+  return picked.map(i => pool[i]);
+}
 
-  // Show quiz
+function setQuizLang(lang) {
+  quizLang = lang;
+  localStorage.setItem('sg_quiz_lang', lang);
+}
+
+function showLangSelector() {
+  document.getElementById('quizPanel').classList.add('show');
+  document.getElementById('quizResult').style.display = 'none';
+  document.getElementById('quizBody').style.display = 'none';
+  let sel = document.getElementById('quizLangSelect');
+  if (!sel) {
+    sel = document.createElement('div');
+    sel.id = 'quizLangSelect';
+    sel.style.cssText = 'text-align:center;padding:40px 20px;';
+    document.querySelector('#quizPanel .quiz-box').appendChild(sel);
+  }
+  sel.style.display = '';
+  sel.innerHTML = `
+    <div style="font-size:40px;margin-bottom:16px;">📚</div>
+    <div style="font-size:20px;font-weight:700;color:#fff;margin-bottom:8px;">어떤 과목을 풀래?</div>
+    <div style="font-size:13px;color:#888;margin-bottom:24px;">Choose your quiz language</div>
+    <button onclick="setQuizLang('fr');startQuiz()" style="display:block;width:100%;padding:16px;margin-bottom:12px;border-radius:14px;border:2px solid #3b82f6;background:rgba(59,130,246,0.1);color:#60a5fa;font-size:18px;font-weight:700;cursor:pointer;">
+      🇫🇷 Français (프랑스어)
+    </button>
+    <button onclick="setQuizLang('la');startQuiz()" style="display:block;width:100%;padding:16px;border-radius:14px;border:2px solid #a855f7;background:rgba(168,85,247,0.1);color:#c084fc;font-size:18px;font-weight:700;cursor:pointer;">
+      🏛️ Latina (라틴어)
+    </button>`;
+}
+
+function startFrenchQuiz() { showLangSelector(); }
+
+function startQuiz() {
+  const langSel = document.getElementById('quizLangSelect');
+  if (langSel) langSel.style.display = 'none';
+
+  if (quizLang === 'la') {
+    const vocabPicked = pickUnused(LATIN_VOCAB, usedLaVocabIndices, 6);
+    const gramPicked = pickUnused(LATIN_GRAMMAR, usedLaGramIndices, 4);
+    const vocabQs = vocabPicked.map(word => {
+      const sameCat = LATIN_VOCAB.filter(w => w.cat === word.cat && w.en !== word.en);
+      const diffCat = LATIN_VOCAB.filter(w => w.en !== word.en);
+      let wrongPool = sameCat.length >= 3 ? shuffle(sameCat) : shuffle(diffCat);
+      const wrongs = wrongPool.slice(0, 3).map(w => w.en);
+      const options = shuffle([word.en, ...wrongs]);
+      return { display: word.la, hint: `${CAT_ICONS[word.cat]||'📖'} ${word.cat} · 뜻을 골라보세요!`, options, answer: word.en, cat: word.cat };
+    });
+    const gramQs = gramPicked.map(g => ({
+      display: g.q, hint: `${CAT_ICONS[g.cat]||'🏛️'} ${g.cat}`, options: shuffle([...g.opts]), answer: g.a, cat: g.cat, isGrammar: true
+    }));
+    quizQuestions = shuffle([...vocabQs, ...gramQs]);
+  } else {
+    const picked = pickUnused(FRENCH_VOCAB, usedFrIndices, QUIZ_TOTAL);
+    quizQuestions = picked.map(word => {
+      const sameCat = FRENCH_VOCAB.filter(w => w.cat === word.cat && w.en !== word.en);
+      const diffCat = FRENCH_VOCAB.filter(w => w.en !== word.en);
+      let wrongPool = sameCat.length >= 3 ? shuffle(sameCat) : shuffle(diffCat);
+      const wrongs = wrongPool.slice(0, 3).map(w => w.en);
+      const options = shuffle([word.en, ...wrongs]);
+      return { display: word.fr, hint: `${CAT_ICONS[word.cat]||'📖'} ${word.cat} · 뜻을 골라보세요!`, options, answer: word.en, cat: word.cat };
+    });
+  }
+  quizCurrent = 0; quizCorrect = 0; quizAnswered = false;
   document.getElementById('quizPanel').classList.add('show');
   document.getElementById('quizResult').style.display = 'none';
   document.getElementById('quizBody').style.display = '';
-  renderQuizProgress();
-  renderQuizQuestion();
+  renderQuizProgress(); renderQuizQuestion();
 }
 
 function renderQuizProgress() {
@@ -2378,12 +2599,11 @@ function renderQuizProgress() {
 
 function renderQuizQuestion() {
   const q = quizQuestions[quizCurrent];
-  const icon = CAT_ICONS[q.cat] || '📖';
-  document.getElementById('quizNum').textContent = `문제 ${quizCurrent + 1} / ${QUIZ_TOTAL}`;
-  document.getElementById('quizWord').textContent = q.fr;
-  document.getElementById('quizHint').textContent = `${icon} ${q.cat} · 뜻을 골라보세요!`;
+  const langLabel = quizLang === 'la' ? '🏛️ LATINA' : '🇫🇷 FRANÇAIS';
+  document.getElementById('quizNum').textContent = `${langLabel}  문제 ${quizCurrent + 1} / ${QUIZ_TOTAL}`;
+  document.getElementById('quizWord').textContent = q.display;
+  document.getElementById('quizHint').textContent = q.hint;
   document.getElementById('quizScoreDisplay').textContent = `✅ ${quizCorrect} / ${quizCurrent}`;
-
   const optDiv = document.getElementById('quizOptions');
   optDiv.innerHTML = q.options.map((opt, i) =>
     `<button class="quiz-option" onclick="selectQuizAnswer(${i})">${opt}</button>`
@@ -2394,68 +2614,51 @@ function renderQuizQuestion() {
 function selectQuizAnswer(idx) {
   if (quizAnswered) return;
   quizAnswered = true;
-
   const q = quizQuestions[quizCurrent];
   const selected = q.options[idx];
   const correct = selected === q.answer;
   if (correct) quizCorrect++;
   q.wasCorrect = correct;
-
-  // Highlight buttons
   const btns = document.querySelectorAll('#quizOptions .quiz-option');
   btns.forEach((btn, i) => {
     btn.disabled = true;
     if (q.options[i] === q.answer) btn.classList.add('correct');
     if (i === idx && !correct) btn.classList.add('wrong');
   });
-
-  // Update progress
   renderQuizProgress();
   document.getElementById('quizScoreDisplay').textContent = `✅ ${quizCorrect} / ${quizCurrent + 1}`;
-
-  // Next question or result after delay
   setTimeout(() => {
     quizCurrent++;
-    if (quizCurrent >= QUIZ_TOTAL) {
-      showQuizResult();
-    } else {
-      renderQuizProgress();
-      renderQuizQuestion();
-    }
+    if (quizCurrent >= QUIZ_TOTAL) showQuizResult();
+    else { renderQuizProgress(); renderQuizQuestion(); }
   }, 1000);
 }
 
 function showQuizResult() {
   document.getElementById('quizBody').style.display = 'none';
-  const resultDiv = document.getElementById('quizResult');
-  resultDiv.style.display = '';
-
+  const rd = document.getElementById('quizResult');
+  rd.style.display = '';
   const passed = quizCorrect >= QUIZ_PASS;
   const pct = Math.round(quizCorrect / QUIZ_TOTAL * 100);
-
+  const langEmoji = quizLang === 'la' ? '🏛️ Optime!' : '🇫🇷 Très bien!';
   if (passed) {
-    resultDiv.innerHTML = `
-      <div class="quiz-result-icon">🎉</div>
+    rd.innerHTML = `<div class="quiz-result-icon">🎉</div>
       <div class="quiz-result-title pass">합격! PASS!</div>
       <div class="quiz-result-score">${quizCorrect}/${QUIZ_TOTAL} (${pct}%)</div>
-      <div class="quiz-result-msg">잘했어 연성아! 🇫🇷 Très bien!<br>10분 더 볼 수 있어!</div>
-      <button class="quiz-result-btn unlock" onclick="quizUnlock()">🎮 10분 더 보기!</button>
-    `;
+      <div class="quiz-result-msg">잘했어 연성아! ${langEmoji}<br>10분 더 볼 수 있어!</div>
+      <button class="quiz-result-btn unlock" onclick="quizUnlock()">🎮 10분 더!</button>`;
   } else {
-    resultDiv.innerHTML = `
-      <div class="quiz-result-icon">😢</div>
+    rd.innerHTML = `<div class="quiz-result-icon">😢</div>
       <div class="quiz-result-title fail">아쉽다! Not quite...</div>
       <div class="quiz-result-score">${quizCorrect}/${QUIZ_TOTAL} (${pct}%) — ${QUIZ_PASS}개 필요!</div>
       <div class="quiz-result-msg">다시 도전해보자!<br>조금만 더 공부하면 돼!</div>
-      <button class="quiz-result-btn retry" onclick="retryQuiz()">🔄 다시 도전!</button>
-      <button class="quiz-result-btn back" onclick="closeQuiz()">🔒 돌아가기</button>
-    `;
+      <button class="quiz-result-btn retry" onclick="startFrenchQuiz()">🔄 다시 도전!</button>
+      <button class="quiz-result-btn back" onclick="closeQuiz()">🔒 돌아가기</button>`;
   }
 }
 
 function quizUnlock() {
   document.getElementById('quizPanel').classList.remove('show');
-  // 하루 한도 체크
   if (isDailyLimitReached()) { activateHardLock(); return; }
   screenLocked = false;
   screenLockTime = null;
@@ -2469,9 +2672,7 @@ function quizUnlock() {
   startDailyTracker();
 }
 
-function retryQuiz() {
-  startFrenchQuiz();
-}
+function retryQuiz() { startFrenchQuiz(); }
 
 function closeQuiz() {
   document.getElementById('quizPanel').classList.remove('show');
