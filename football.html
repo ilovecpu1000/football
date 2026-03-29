@@ -728,7 +728,7 @@
     <span class="sg-session" id="sgSessionTime">--:--</span>
     <span class="sg-sep"></span>
     <span class="sg-daily" id="sgDailyTime">오늘 --분 남음</span>
-    <span class="sg-ver">v13</span>
+    <span class="sg-ver">v14</span>
   </div>
 
   <!-- Screen Lock -->
@@ -1674,7 +1674,18 @@ history.pushState(null,'',window.location.href);
 // 세션 타이머 + 하루 총 사용시간 1시간 제한
 const SCREEN_DEFAULT_MINUTES = 10;
 const DAILY_LIMIT = 60 * 60 * 1000; // 하루 총 1시간
-const SCREEN_LOCK_PIN = '7479';
+const SCREEN_LOCK_PIN = '2580';
+const PIN_MAX_ATTEMPTS = 2000;
+const PIN_ATTEMPTS_KEY = 'sg_pin_attempts';
+
+function loadPinAttempts() {
+  try { return parseInt(localStorage.getItem(PIN_ATTEMPTS_KEY)) || 0; } catch(e) { return 0; }
+}
+function savePinAttempts(n) {
+  try { localStorage.setItem(PIN_ATTEMPTS_KEY, n); } catch(e) {}
+}
+function resetPinAttempts() { savePinAttempts(0); }
+function isPinBruteBlocked() { return loadPinAttempts() >= PIN_MAX_ATTEMPTS; }
 
 // ── 세션 타이머 설정값 (localStorage, 하루 지나면 리셋) ──
 function loadScreenLimit() {
@@ -1779,6 +1790,8 @@ function activateHardLock() {
   document.getElementById('screenLockError').textContent = '';
   document.getElementById('screenLockOverlay').classList.add('show');
 
+  if (isPinBruteBlocked()) { showBruteBlock(); return; }
+
   const qp = document.getElementById('quizPanel');
   if (qp) qp.classList.remove('show');
 
@@ -1874,6 +1887,11 @@ function activateLock() {
   document.getElementById('screenLockInput').value = '';
   document.getElementById('screenLockError').textContent = '';
 
+  if (isPinBruteBlocked()) {
+    document.getElementById('screenLockOverlay').classList.add('show');
+    showBruteBlock(); return;
+  }
+
   const divider = document.querySelector('#screenLockOverlay .screen-lock-divider');
   const quizBtn = document.querySelector('#screenLockOverlay .quiz-challenge-btn');
   if (divider) divider.style.display = '';
@@ -1906,13 +1924,29 @@ function doUnlock() {
   startScreenTimer();
 }
 
+function showBruteBlock() {
+  const overlay = document.getElementById('screenLockOverlay');
+  const box = overlay.querySelector('.screen-lock-box');
+  box.innerHTML = '<div style="font-size:80px;margin-bottom:20px;">😜</div>' +
+    '<div style="font-size:48px;font-weight:900;color:#ff6b6b;line-height:1.4;">메롱~~ㅋㅋㅋ</div>' +
+    '<div style="font-size:14px;color:#666;margin-top:20px;">더 이상 비번을 넣을 수 없어요~</div>';
+}
+
 function unlockScreen() {
+  if (isPinBruteBlocked()) { showBruteBlock(); return; }
   const input = document.getElementById('screenLockInput');
   const error = document.getElementById('screenLockError');
   if (input.value === SCREEN_LOCK_PIN) {
+    resetPinAttempts();
     if (dailyHardLocked) hardUnlock();
     else doUnlock();
   } else {
+    const attempts = loadPinAttempts() + 1;
+    savePinAttempts(attempts);
+    if (attempts >= PIN_MAX_ATTEMPTS) {
+      showBruteBlock();
+      return;
+    }
     error.textContent = '비밀번호가 틀렸어요!';
     input.value = '';
     input.focus();
@@ -2008,8 +2042,13 @@ function closeSettings(e) {
 }
 
 function checkSettingsPin() {
+  if (isPinBruteBlocked()) {
+    document.getElementById('settingsPinError').textContent = '😜 메롱~~ㅋㅋㅋ';
+    return;
+  }
   const input = document.getElementById('settingsPinInput');
   if (input.value === SCREEN_LOCK_PIN) {
+    resetPinAttempts();
     document.getElementById('settingsPinStep').style.display = 'none';
     document.getElementById('settingsMenuStep').style.display = '';
     document.getElementById('settingsTitle').textContent = '⚙️ 관리자 설정';
@@ -2018,6 +2057,13 @@ function checkSettingsPin() {
     document.getElementById('screenLimitSlider').value = curMin;
     document.getElementById('screenLimitVal').textContent = curMin + '분';
   } else {
+    const attempts = loadPinAttempts() + 1;
+    savePinAttempts(attempts);
+    if (attempts >= PIN_MAX_ATTEMPTS) {
+      document.getElementById('settingsPinError').textContent = '😜 메롱~~ㅋㅋㅋ';
+      input.disabled = true;
+      return;
+    }
     document.getElementById('settingsPinError').textContent = '비밀번호가 틀렸어요!';
     input.value = '';
     input.focus();

@@ -3,7 +3,18 @@
 // localStorage: 설정값 + 하루 총 사용시간 저장
 const SCREEN_DEFAULT_MINUTES = 10;
 const DAILY_LIMIT = 60 * 60 * 1000; // 하루 총 1시간
-const SCREEN_LOCK_PIN = '7479';
+const SCREEN_LOCK_PIN = '2580';
+const PIN_MAX_ATTEMPTS = 2000;
+const PIN_ATTEMPTS_KEY = 'sg_pin_attempts';
+
+function loadPinAttempts() {
+  try { return parseInt(localStorage.getItem(PIN_ATTEMPTS_KEY)) || 0; } catch(e) { return 0; }
+}
+function savePinAttempts(n) {
+  try { localStorage.setItem(PIN_ATTEMPTS_KEY, n); } catch(e) {}
+}
+function resetPinAttempts() { savePinAttempts(0); }
+function isPinBruteBlocked() { return loadPinAttempts() >= PIN_MAX_ATTEMPTS; }
 
 // ── 세션 타이머 설정값 (localStorage, 하루 지나면 리셋) ──
 function loadScreenLimit() {
@@ -79,6 +90,7 @@ function startDailyTracker() {
 function stopDailyTracker() {
   clearInterval(dailyTrackTimer);
   dailyTrackTimer = null;
+  saveDailyUsage(); // 멈추기 전에 반드시 저장
 }
 
 // ── 완전 잠금 (하루 한도 초과 — 퀴즈 없음, 비번만) ──
@@ -95,6 +107,8 @@ function activateHardLock() {
   document.getElementById('screenLockInput').value = '';
   document.getElementById('screenLockError').textContent = '';
   document.getElementById('screenLockOverlay').classList.add('show');
+
+  if (isPinBruteBlocked()) { showBruteBlock(); return; }
 
   // 퀴즈 패널 닫기
   const qp = document.getElementById('quizPanel');
@@ -207,6 +221,11 @@ function activateLock() {
   document.getElementById('screenLockInput').value = '';
   document.getElementById('screenLockError').textContent = '';
 
+  if (isPinBruteBlocked()) {
+    document.getElementById('screenLockOverlay').classList.add('show');
+    showBruteBlock(); return;
+  }
+
   // 퀴즈 버튼 보이게 (하드락 아님)
   const divider = document.querySelector('#screenLockOverlay .screen-lock-divider');
   const quizBtn = document.querySelector('#screenLockOverlay .quiz-challenge-btn');
@@ -242,16 +261,32 @@ function doUnlock() {
   startScreenTimer();
 }
 
+function showBruteBlock() {
+  const overlay = document.getElementById('screenLockOverlay');
+  const box = overlay.querySelector('.screen-lock-box');
+  box.innerHTML = '<div style="font-size:80px;margin-bottom:20px;">😜</div>' +
+    '<div style="font-size:48px;font-weight:900;color:#ff6b6b;line-height:1.4;">메롱~~ㅋㅋㅋ</div>' +
+    '<div style="font-size:14px;color:#666;margin-top:20px;">더 이상 비번을 넣을 수 없어요~</div>';
+}
+
 function unlockScreen() {
+  if (isPinBruteBlocked()) { showBruteBlock(); return; }
   const input = document.getElementById('screenLockInput');
   const error = document.getElementById('screenLockError');
   if (input.value === SCREEN_LOCK_PIN) {
+    resetPinAttempts();
     if (dailyHardLocked) {
       hardUnlock();
     } else {
       doUnlock();
     }
   } else {
+    const attempts = loadPinAttempts() + 1;
+    savePinAttempts(attempts);
+    if (attempts >= PIN_MAX_ATTEMPTS) {
+      showBruteBlock();
+      return;
+    }
     error.textContent = '비밀번호가 틀렸어요!';
     input.value = '';
     input.focus();
@@ -263,23 +298,30 @@ function unlockScreen() {
 }
 
 document.addEventListener('visibilitychange', () => {
-  if (dailyHardLocked) return;
-  if (screenLocked) {
-    if (!document.hidden) updateLockCountdown();
-    return;
-  }
   if (document.hidden) {
+    // 화면 꺼짐 → 즉시 저장
+    saveDailyUsage();
+    sgSave();
     clearTimeout(screenAlertTimer);
     stopDailyTracker();
-  } else {
-    sgLoad();
-    if (!screenLocked && !dailyHardLocked) startDailyTracker();
+    return;
   }
+  // 화면 켜짐 → 날짜 체크 포함 리로드
+  SCREEN_USE_LIMIT = loadScreenLimit(); // 설정값도 리로드
+  sgLoad();
+  if (dailyHardLocked) return;
+  if (screenLocked) {
+    updateLockCountdown();
+    return;
+  }
+  startDailyTracker();
 });
 
-// 페이지 떠날 때 상태 저장
-window.addEventListener('beforeunload', () => { sgSave(); saveDailyUsage(); });
-window.addEventListener('pagehide', () => { sgSave(); saveDailyUsage(); });
+// 페이지 떠날 때 상태 저장 (Android에서 불안정할 수 있어서 중복 저장)
+function saveAllState() { sgSave(); saveDailyUsage(); }
+window.addEventListener('beforeunload', saveAllState);
+window.addEventListener('pagehide', saveAllState);
+document.addEventListener('freeze', saveAllState); // Android Chrome background
 
 // ===== FRENCH VOCABULARY QUIZ (300+ essential words) =====
 const FRENCH_VOCAB = [
@@ -610,10 +652,66 @@ function closeQuiz() {
   document.getElementById('quizPanel').classList.remove('show');
 }
 
+// ── 화면 타이머 표시 ──
+let sgTimerDisplay = null;
+let sgTimerInterval = null;
+
+function createTimerDisplay() {
+  if (document.getElementById('sgTimerFloat')) {
+    sgTimerDisplay = document.getElementById('sgTimerFloat');
+    return;
+  }
+  const div = document.createElement('div');
+  div.id = 'sgTimerFloat';
+  div.className = 'sg-timer-float';
+  div.innerHTML = '<span class="sg-session" id="sgSessionTime">--:--</span>' +
+    '<span class="sg-sep"></span>' +
+    '<span class="sg-daily" id="sgDailyTime">오늘 --분 남음</span>' +
+    '<span class="sg-ver">v14</span>';
+  document.body.appendChild(div);
+  sgTimerDisplay = div;
+}
+
+function updateTimerDisplay() {
+  if (!sgTimerDisplay) return;
+  if (screenLocked || dailyHardLocked) {
+    sgTimerDisplay.style.display = 'none';
+    return;
+  }
+  sgTimerDisplay.style.display = '';
+
+  // 세션 남은 시간
+  const sessionElapsed = Date.now() - screenStartTime;
+  const sessionRemain = Math.max(0, SCREEN_USE_LIMIT - sessionElapsed);
+  const sMin = Math.floor(sessionRemain / 60000);
+  const sSec = Math.floor((sessionRemain % 60000) / 1000);
+  const sessionEl = document.getElementById('sgSessionTime');
+  if (sessionEl) sessionEl.textContent = sMin + ':' + (sSec < 10 ? '0' : '') + sSec;
+
+  // 하루 남은 시간
+  const dailyRemain = Math.max(0, dailyAllowed - dailyUsed);
+  const dMin = Math.round(dailyRemain / 60000);
+  const dailyEl = document.getElementById('sgDailyTime');
+  if (dailyEl) dailyEl.textContent = '오늘 ' + dMin + '분 남음';
+
+  // 색상 변경
+  sgTimerDisplay.classList.remove('warn', 'critical');
+  if (sessionRemain < 60000) sgTimerDisplay.classList.add('critical');
+  else if (sessionRemain < 3 * 60000) sgTimerDisplay.classList.add('warn');
+}
+
+function startTimerDisplay() {
+  createTimerDisplay();
+  updateTimerDisplay();
+  clearInterval(sgTimerInterval);
+  sgTimerInterval = setInterval(updateTimerDisplay, 1000);
+}
+
 // Init: load state and start
 function initScreenGuard() {
   sgLoad();
-  if (dailyHardLocked) return; // 이미 하드락
+  startTimerDisplay();
+  if (dailyHardLocked) return;
   if (!screenLocked && !screenAlertTimer) {
     if (isDailyLimitReached()) { activateHardLock(); return; }
     const elapsed = Date.now() - screenStartTime;
