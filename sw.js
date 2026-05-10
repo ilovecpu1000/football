@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ys-football-v15';
+const CACHE_NAME = 'ys-football-v16';
 
 // Install event - cache basic shell
 self.addEventListener('install', (event) => {

@@ -1631,7 +1631,7 @@ if (!restoreGameState()) {
     <div class="screen-lock-msg">사용 시간 초과!<br>잠금되었습니다</div>
     <div class="screen-lock-sub" id="screenLockSub"></div>
     <input type="password" class="screen-lock-input" id="screenLockInput"
-           placeholder="••••" maxlength="10" inputmode="numeric"
+           placeholder="비밀번호" maxlength="20"
            onkeydown="if(event.key==='Enter')unlockScreen()">
     <button class="screen-lock-submit" onclick="unlockScreen()">잠금 해제</button>
     <div class="screen-lock-error" id="screenLockError"></div>

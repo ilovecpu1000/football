@@ -518,9 +518,9 @@
     }
     .screen-lock-sub { font-size: 13px; color: #aaa; margin-bottom: 24px; }
     .screen-lock-input {
-      width: 180px; padding: 12px 16px; border: 2px solid #444;
-      border-radius: 12px; font-size: 20px; text-align: center;
-      background: #2a2a3e; color: #fff; letter-spacing: 8px;
+      width: 220px; padding: 12px 16px; border: 2px solid #444;
+      border-radius: 12px; font-size: 18px; text-align: center;
+      background: #2a2a3e; color: #fff;
       outline: none; -webkit-text-security: disc;
     }
     .screen-lock-input:focus { border-color: #2563eb; }
@@ -728,7 +728,7 @@
     <span class="sg-session" id="sgSessionTime">--:--</span>
     <span class="sg-sep"></span>
     <span class="sg-daily" id="sgDailyTime">오늘 --분 남음</span>
-    <span class="sg-ver">v15</span>
+    <span class="sg-ver">v16</span>
   </div>
 
   <!-- Screen Lock -->
@@ -738,7 +738,7 @@
       <div class="screen-lock-msg">사용 시간 초과!<br>잠금되었습니다</div>
       <div class="screen-lock-sub" id="screenLockSub"></div>
       <input type="password" class="screen-lock-input" id="screenLockInput"
-             placeholder="••••" maxlength="10" inputmode="numeric"
+             placeholder="비밀번호" maxlength="20"
              onkeydown="if(event.key==='Enter')unlockScreen()">
       <button class="screen-lock-submit" onclick="unlockScreen()">잠금 해제</button>
       <div class="screen-lock-error" id="screenLockError"></div>
@@ -780,7 +780,7 @@
         <div id="settingsPinStep">
           <div class="screen-alert-sub">비밀번호를 입력하세요</div>
           <input type="password" class="screen-lock-input" id="settingsPinInput"
-                 placeholder="••••" maxlength="10" inputmode="numeric"
+                 placeholder="비밀번호" maxlength="20"
                  onkeydown="if(event.key==='Enter')checkSettingsPin()"
                  style="margin-bottom:12px;">
           <div class="screen-lock-error" id="settingsPinError"></div>
@@ -797,6 +797,15 @@
               <span id="screenLimitVal" style="font-size:18px;font-weight:700;color:#f97316;min-width:40px;">10분</span>
             </div>
             <button class="settings-menu-btn" onclick="applyScreenLimit()" style="margin-top:8px;background:rgba(249,115,22,0.2);border-color:#f97316;">✅ 적용</button>
+          </div>
+          <div style="margin-bottom:16px;padding:12px;background:rgba(255,255,255,0.08);border-radius:12px;">
+            <div style="font-size:14px;color:#aaa;margin-bottom:8px;">🔑 비밀번호 변경</div>
+            <input type="password" id="newPinInput" placeholder="새 비밀번호" maxlength="20"
+                   style="width:180px;padding:10px 14px;border:2px solid #444;border-radius:10px;font-size:16px;text-align:center;background:#2a2a3e;color:#fff;outline:none;margin-bottom:8px;">
+            <input type="password" id="newPinConfirm" placeholder="비밀번호 확인" maxlength="20"
+                   style="width:180px;padding:10px 14px;border:2px solid #444;border-radius:10px;font-size:16px;text-align:center;background:#2a2a3e;color:#fff;outline:none;margin-bottom:4px;">
+            <div id="pinChangeError" style="color:#ff4444;font-size:12px;min-height:16px;margin-bottom:4px;"></div>
+            <button class="settings-menu-btn" onclick="changePin()" style="background:rgba(139,92,246,0.2);border-color:#8b5cf6;">🔑 변경</button>
           </div>
           <button class="settings-menu-btn" onclick="openWifiSettings()">📶 WiFi 설정 열기</button>
           <button class="settings-menu-btn" onclick="resetScreenTimer()">⏰ 스크린타임 리셋</button>
@@ -1674,8 +1683,10 @@ history.pushState(null,'',window.location.href);
 // 세션 타이머 + 하루 총 사용시간 1시간 제한
 const SCREEN_DEFAULT_MINUTES = 10;
 const DAILY_LIMIT = 60 * 60 * 1000; // 하루 총 1시간
-const SCREEN_LOCK_PIN = '2580';
-const PIN_MAX_ATTEMPTS = 2000;
+const SCREEN_LOCK_PIN_DEFAULT = '2580';
+function getPin() { return localStorage.getItem('sg_pin') || SCREEN_LOCK_PIN_DEFAULT; }
+function setPin(p) { localStorage.setItem('sg_pin', p); }
+const PIN_MAX_ATTEMPTS = 3;
 const PIN_ATTEMPTS_KEY = 'sg_pin_attempts';
 
 function loadPinAttempts() {
@@ -1936,7 +1947,7 @@ function unlockScreen() {
   if (isPinBruteBlocked()) { showBruteBlock(); return; }
   const input = document.getElementById('screenLockInput');
   const error = document.getElementById('screenLockError');
-  if (input.value === SCREEN_LOCK_PIN) {
+  if (input.value === getPin()) {
     resetPinAttempts();
     if (dailyHardLocked) hardUnlock();
     else doUnlock();
@@ -2047,7 +2058,7 @@ function checkSettingsPin() {
     return;
   }
   const input = document.getElementById('settingsPinInput');
-  if (input.value === SCREEN_LOCK_PIN) {
+  if (input.value === getPin()) {
     resetPinAttempts();
     document.getElementById('settingsPinStep').style.display = 'none';
     document.getElementById('settingsMenuStep').style.display = '';
@@ -2103,6 +2114,21 @@ function applyScreenLimit() {
   else if (screenLocked) doUnlock();
   else startScreenTimer();
   closeSettings();
+}
+
+function changePin() {
+  const newPin = document.getElementById('newPinInput').value;
+  const confirm = document.getElementById('newPinConfirm').value;
+  const err = document.getElementById('pinChangeError');
+  if (!newPin || newPin.length < 2) { err.textContent = '2자 이상 입력하세요'; return; }
+  if (newPin !== confirm) { err.textContent = '비밀번호가 일치하지 않아요'; return; }
+  setPin(newPin);
+  resetPinAttempts();
+  err.style.color = '#4ade80';
+  err.textContent = '✅ 변경 완료!';
+  document.getElementById('newPinInput').value = '';
+  document.getElementById('newPinConfirm').value = '';
+  setTimeout(() => { err.textContent = ''; err.style.color = '#ff4444'; }, 2000);
 }
 
 function resetDailyUsage() {
