@@ -268,7 +268,26 @@ function showBruteBlock() {
   const box = overlay.querySelector('.screen-lock-box');
   box.innerHTML = '<div style="font-size:80px;margin-bottom:20px;">😜</div>' +
     '<div style="font-size:48px;font-weight:900;color:#ff6b6b;line-height:1.4;">메롱~~ㅋㅋㅋ</div>' +
-    '<div style="font-size:14px;color:#666;margin-top:20px;">더 이상 비번을 넣을 수 없어요~</div>';
+    '<div style="font-size:14px;color:#666;margin-top:16px;">더 이상 비번을 넣을 수 없어요~</div>' +
+    '<input type="password" id="bruteUnlockInput" placeholder="비밀번호" maxlength="20" ' +
+    'style="width:200px;padding:10px 14px;border:2px solid #444;border-radius:10px;font-size:16px;text-align:center;background:#2a2a3e;color:#fff;outline:none;margin-top:16px;-webkit-text-security:disc;" ' +
+    'onkeydown="if(event.key===\'Enter\')bruteUnlock()">' +
+    '<div id="bruteUnlockError" style="color:#ff4444;font-size:12px;min-height:16px;margin-top:6px;"></div>' +
+    '<button onclick="bruteUnlock()" style="margin-top:8px;padding:10px 28px;border-radius:20px;border:none;background:#2563eb;color:#fff;font-size:14px;font-weight:700;cursor:pointer;">확인</button>';
+}
+
+function bruteUnlock() {
+  const input = document.getElementById('bruteUnlockInput');
+  const error = document.getElementById('bruteUnlockError');
+  if (input.value === getPin()) {
+    resetPinAttempts();
+    if (dailyHardLocked) { location.reload(); }
+    else { location.reload(); }
+  } else {
+    error.textContent = '😜 메롱~~ㅋㅋㅋ';
+    input.value = '';
+    input.focus();
+  }
 }
 
 function unlockScreen() {
